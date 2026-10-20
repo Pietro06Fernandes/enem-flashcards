@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENEM Flashcards — Revisão Inteligente</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wine: {
+                            dark: '#4A121F',
+                            DEFAULT: '#6B1D2F',
+                            light: '#8B263E',
+                            surface: '#380D17'
+                        },
+                        cream: {
+                            light: '#FFFDF9',
+                            DEFAULT: '#FAF7F0',
+                            dark: '#F3ECE1',
+                            card: '#FFFDF8'
+                        },
+                        gold: {
+                            light: '#E6C65A',
+                            DEFAULT: '#D4AF37',
+                            dark: '#B08D22'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 3D Flip Card Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F3ECE1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8B263E;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B1D2F;
+        }
+    </style>
+</head>
+<body class="bg-cream text-slate-800 font-sans min-h-screen flex flex-col selection:bg-gold selection:text-wine-dark">
+
+    <!-- TOP HEADER / DASHBOARD STATS -->
+    <header class="bg-wine-dark text-cream-light border-b-2 border-gold sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="showDashboard()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-wine-dark text-xl font-black shadow-md">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-lg sm:text-xl tracking-tight text-cream-light flex items-center gap-2">
+                            ENEM Flashcards
+                            <span class="text-xs bg-gold/20 text-gold font-semibold px-2 py-0.5 rounded-full border border-gold/40">Pro 2026</span>
+                        </h1>
+                        <p class="text-xs text-cream-dark/80">Revisão Inteligente &amp; Pegadinhas do INEP</p>
+                    </div>
+                </div>
+
+                <!-- Global Progress Bar & Quick Stats -->
+                <div class="flex items-center gap-4 sm:gap-6 w-full md:w-auto justify-between md:justify-end bg-wine/50 p-2 sm:p-2.5 rounded-xl border border-wine-light/30">
+                    <div class="text-center px-2">
+                        <span class="text-xs text-cream-dark/70 block uppercase font-bold tracking-wider">Estudados</span>
+                        <span id="stat-total-studied" class="text-base sm:text-lg font-black text-cream-light">0 / 136</span>
+                    </div>
+
+                    <div class="h-8 w-px bg-wine-light/40"></div>
+
+                    <div class="flex gap-3 text-xs sm:text-sm font-bold">
+                        <div class="flex flex-col items-center">
+                            <span class="text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-circle-check text-[10px]"></i> Dominei</span>
+                            <span id="stat-dominei" class="text-cream-light text-base font-extrabold">0</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-amber-300 flex items-center gap-1"><i class="fa-solid fa-circle-question text-[10px]"></i> Dúvida</span>
+                            <span id="stat-duvida" class="text-cream-light text-base font-extrabold">0</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-rose-400 flex items-center gap-1"><i class="fa-solid fa-circle-xmark text-[10px]"></i> Errei</span>
+                            <span id="stat-errei" class="text-cream-light text-base font-extrabold">0</span>
+                        </div>
+                    </div>
+
+                    <div class="h-8 w-px bg-wine-light/40 hidden sm:block"></div>
+
+                    <!-- Performance Score -->
+                    <div class="hidden sm:flex flex-col items-end min-w-[90px]">
+                        <span class="text-[11px] text-gold uppercase font-bold tracking-wider">Aproveitamento</span>
+                        <span id="stat-accuracy" class="text-base font-black text-gold">0%</span>
+                    </div>
+
+                    <!-- Reset Button -->
+                    <button onclick="resetAllProgress()" title="Resetar Todo o Progresso" class="p-2 rounded-lg text-cream-dark/60 hover:text-rose-300 hover:bg-wine-light/50 transition duration-150">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Global Overall Progress Line -->
+            <div class="w-full bg-wine-surface h-2 rounded-full mt-3 overflow-hidden border border-wine-light/20 flex">
+                <div id="bar-dominei" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                <div id="bar-duvida" class="bg-amber-400 h-full transition-all duration-500" style="width: 0%"></div>
+                <div id="bar-errei" class="bg-rose-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- HOME / DASHBOARD VIEW -->
+        <section id="view-dashboard" class="space-y-8">
+            
+            <!-- Hero Header -->
+            <div class="bg-gradient-to-r from-wine to-wine-light rounded-2xl p-6 sm:p-8 text-cream-light shadow-xl border border-gold/30 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-gold pointer-events-none">
+                    <i class="fa-solid fa-book-bookmark text-[220px]"></i>
+                </div>
+                <div class="relative z-10 max-w-3xl space-y-3">
+                    <span class="inline-block px-3 py-1 bg-gold/20 text-gold border border-gold/30 rounded-full text-xs font-bold uppercase tracking-wider">
+                        Revisão Completa ENEM
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-cream-light leading-tight">
+                        Domine os conteúdos mais recorrentes com estratégias e pegadinhas do INEP.
+                    </h2>
+                    <p class="text-cream-dark/90 text-sm sm:text-base leading-relaxed">
+                        Escolha uma disciplina abaixo para acessar seus <strong>8 flashcards estratégicos</strong> com respostas explicativas, maquetes e pontos vitais cobrados nas provas do ENEM.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ENEM AREAS & DISCIPLINES GRID -->
+            <div id="areas-container" class="space-y-10">
+                <!-- Dynamically Rendered by JS -->
+            </div>
+
+        </section>
+
+        <!-- STUDY VIEW (FLASHCARDS) -->
+        <section id="view-study" class="hidden space-y-6">
+            
+            <!-- Subject Navigation Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-cream-card p-4 rounded-xl border border-cream-dark shadow-sm">
+                <button onclick="showDashboard()" class="inline-flex items-center gap-2 px-4 py-2 bg-cream-dark/60 hover:bg-cream-dark text-wine font-bold rounded-lg transition duration-200 text-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar às Áreas
+                </button>
+
+                <div class="flex items-center gap-3">
+                    <span id="study-area-badge" class="px-3 py-1 bg-wine/10 text-wine text-xs font-bold rounded-full border border-wine/20 uppercase tracking-wider">
+                        Área
+                    </span>
+                    <h2 id="study-subject-title" class="text-xl sm:text-2xl font-black text-wine-dark">
+                        Nome da Disciplina
+                    </h2>
+                </div>
+
+                <!-- Mode Toggle (Single Card vs Gallery Grid) -->
+                <div class="flex items-center bg-cream-dark p-1 rounded-lg border border-cream-dark">
+                    <button id="btn-mode-single" onclick="setStudyMode('single')" class="px-3 py-1.5 rounded-md text-xs font-bold text-wine bg-white shadow-sm transition">
+                        <i class="fa-solid fa-layer-group"></i> Mod. Individual
+                    </button>
+                    <button id="btn-mode-grid" onclick="setStudyMode('grid')" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-wine transition">
+                        <i class="fa-solid fa-border-all"></i> Mod. Galeria (Ver Todos)
+                    </button>
+                </div>
+            </div>
+
+            <!-- SINGLE CARD MODE CONTAINER -->
+            <div id="mode-single-container" class="max-w-3xl mx-auto space-y-6">
+                
+                <!-- Deck Top Controls -->
+                <div class="flex items-center justify-between text-sm font-semibold text-slate-600 px-2">
+                    <span id="single-card-counter" class="bg-wine text-cream-light px-3 py-1 rounded-full text-xs font-extrabold">
+                        Card 1 de 8
+                    </span>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="shuffleCurrentDeck()" class="text-xs bg-cream-dark/80 hover:bg-cream-dark text-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-shuffle text-wine"></i> Embaralhar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3D FLIP CARD COMPONENT -->
+                <div class="perspective-1000 w-full min-h-[420px] sm:min-h-[380px] cursor-pointer" onclick="toggleCardFlip(event)">
+                    <div id="main-flip-card" class="transform-style-3d relative w-full h-full min-h-[420px] sm:min-h-[380px] rounded-2xl shadow-xl border-2 border-gold/40 bg-white">
+                        
+                        <!-- CARD FRONT -->
+                        <div class="backface-hidden absolute inset-0 w-full h-full p-6 sm:p-8 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-cream-card via-white to-cream-light text-wine-dark overflow-y-auto">
+                            
+                            <div class="flex items-center justify-between">
+                                <span id="card-front-topic" class="text-xs font-black uppercase tracking-wider text-gold-dark bg-gold/10 px-3 py-1 rounded-full border border-gold/30">
+                                    Tópico Estratégico
+                                </span>
+                                <span id="card-front-status-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                                    Não Estudado
+                                </span>
+                            </div>
+
+                            <div class="my-auto py-6 space-y-4 text-center">
+                                <i class="fa-solid fa-lightbulb text-gold text-3xl sm:text-4xl animate-pulse"></i>
+                                <h3 id="card-front-question" class="text-xl sm:text-2xl font-black text-wine-dark leading-snug">
+                                    Pergunta ou Pergunta Prática do ENEM?
+                                </h3>
+                                <p class="text-xs sm:text-sm text-slate-500 font-medium">
+                                    Pense na resposta e na estratégia correta antes de virar.
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-center gap-2 text-wine text-xs font-bold bg-wine/5 py-2.5 px-4 rounded-xl border border-wine/10">
+                                <i class="fa-solid fa-rotate"></i> Clique em qualquer lugar do card para ver a resposta e macetes
+                            </div>
+
+                        </div>
+
+                        <!-- CARD BACK -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full p-6 sm:p-8 flex flex-col justify-between rounded-2xl bg-white text-slate-800 overflow-y-auto border-2 border-wine/20">
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+                                    <span id="card-back-topic" class="text-xs font-black uppercase tracking-wider text-wine bg-wine/10 px-3 py-1 rounded-full">
+                                        Resposta &amp; Estratégia
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400">Girar <i class="fa-solid fa-rotate text-wine"></i></span>
+                                </div>
+
+                                <!-- Explanation Content -->
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase tracking-wider font-extrabold text-slate-400">Explicação Completa</h4>
+                                    <p id="card-back-explanation" class="text-sm sm:text-base font-semibold text-slate-800 leading-relaxed">
+                                        Explicação completa e detalhada do conceito.
+                                    </p>
+                                </div>
+
+                                <!-- ENEM Strategy Box -->
+                                <div class="p-3.5 bg-amber-50 rounded-xl border border-amber-200/80 space-y-1">
+                                    <span class="text-xs font-bold text-amber-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bolt text-amber-600"></i> Estratégia ENEM
+                                    </span>
+                                    <p id="card-back-strategy" class="text-xs sm:text-sm text-amber-950 font-medium leading-relaxed">
+                                        Estratégia de resolução e aplicação prática no ENEM.
+                                    </p>
+                                </div>
+
+                                <!-- INEP Trap Box -->
+                                <div class="p-3.5 bg-rose-50 rounded-xl border border-rose-200/80 space-y-1">
+                                    <span class="text-xs font-bold text-rose-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-triangle-exclamation text-rose-600"></i> Pegadinha do INEP
+                                    </span>
+                                    <p id="card-back-trap" class="text-xs sm:text-sm text-rose-950 font-medium leading-relaxed">
+                                        Atenção ao distrator mais comum nesta questão!
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Feedback Buttons Bar -->
+                            <div class="mt-6 pt-4 border-t border-slate-100 space-y-2" onclick="event.stopPropagation()">
+                                <span class="text-center block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Como foi seu desempenho neste card?</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button onclick="markCardStatus('dominei')" class="py-2.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+                                        <i class="fa-solid fa-check"></i> Dominei
+                                    </button>
+                                    <button onclick="markCardStatus('duvida')" class="py-2.5 px-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+                                        <i class="fa-solid fa-question"></i> Dúvida
+                                    </button>
+                                    <button onclick="markCardStatus('errei')" class="py-2.5 px-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+                                        <i class="fa-solid fa-xmark"></i> Errei
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Deck Bottom Navigation Controls -->
+                <div class="flex items-center justify-between gap-4 pt-2">
+                    <button onclick="navigateCard(-1)" class="flex-1 py-3 px-4 bg-cream-card hover:bg-cream-dark text-wine font-extrabold rounded-xl border border-cream-dark shadow-sm flex items-center justify-center gap-2 transition text-sm">
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <button onclick="flipCurrentCard()" class="py-3 px-5 bg-gold hover:bg-gold-dark text-wine-dark font-extrabold rounded-xl shadow-md flex items-center justify-center gap-2 transition text-sm">
+                        <i class="fa-solid fa-rotate"></i> Virar Card
+                    </button>
+                    <button onclick="navigateCard(1)" class="flex-1 py-3 px-4 bg-wine hover:bg-wine-dark text-cream-light font-extrabold rounded-xl shadow-sm flex items-center justify-center gap-2 transition text-sm">
+                        Próximo <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- GALLERY GRID MODE CONTAINER -->
+            <div id="mode-grid-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- JS will render all 8 cards interactive in grid mode -->
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-wine-dark text-cream-dark/70 text-xs py-6 border-t border-gold/30 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold text-cream-light">
+                ENEM Flashcards — Plataforma de Revisão Ativa &amp; Estratégias do INEP
+            </p>
+            <p class="text-cream-dark/60">
+                136 Flashcards com conteúdo programático oficial, esquemas argumentativos de Redação e pegadinhas recorrentes.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APPLICATION CODE -->
+    <script>
+        // COMPLETE ENEM FLASHCARDS DATA STRUCTURE (17 DISCIPLINES x 8 CARDS = 136 CARDS)
+        const flashcardsData = [
+            // ==========================================
+            // 1. LINGUAGENS, CÓDIGOS E SUAS TECNOLOGIAS
+            // ==========================================
+            {
+                areaId: "linguagens",
+                areaName: "Linguagens e Suas Tecnologias",
+                areaIcon: "fa-pen-nib",
+                subjectId: "portugues",
+                subjectName: "Língua Portuguesa e Gramática",
+                icon: "fa-language",
+                cards: [
+                    {
+                        id: "port_1",
+                        topic: "Funções da Linguagem",
+                        question: "Qual é a diferença essencial entre as funções Metalinguística, Emotiva e Conativa no ENEM?",
+                        explanation: "• **Metalinguística**: O código explica o próprio código (dicionário, poema sobre fazer poesia, filme sobre cinema).\n• **Emotiva (Expressiva)**: Foco no emissor, uso de 1ª pessoa, pontuação expressiva e sentimentos.\n• **Conativa (Apelativa)**: Foco no receptor, uso de verbos no imperativo, comum em anúncios publicitários e discursos políticos.",
+                        strategy: "Nas questões com propagandas e campanhas públicas, identifique o foco no leitor/ouvinte com imperativos (ex: 'Faça', 'Doe', 'Previna-se') -> Função Conativa.",
+                        trap: "Confundir Função Poética (foco na construção estético-formal da mensagem) com Função Emotiva (foco nos sentimentos do emissor)."
+                    },
+                    {
+                        id: "port_2",
+                        topic: "Variação Linguística",
+                        question: "Como o ENEM aborda a Variação Linguística e o Preconceito Linguístico?",
+                        explanation: "O ENEM considera todas as variações (regional, social, histórica, situacional/estilo) como legítimas e funcionais. O preconceito linguístico ocorre quando uma variedade (geralmente a norma-padrão) é tratada como 'única correta', inferiorizando falantes de outras regiões ou classes sociais.",
+                        strategy: "Marque alternativas que valorizem a adequação vocabular ao contexto comunicativo em vez de mero 'certo ou errado'.",
+                        trap: "Achar que a variação informal é um 'erro gramatical imperdoável'. Na prova do ENEM, ela é vista como adequação sociocultural ao contexto."
+                    },
+                    {
+                        id: "port_3",
+                        topic: "Figuras de Linguagem",
+                        question: "Como diferenciar Metáfora, Metonímia, Ironia e Anáfora em textos do ENEM?",
+                        explanation: "• **Metáfora**: Comparação implícita sem conectivo ('Você é uma luz').\n• **Metonímia**: Substituição por contiguidade/relação lógica (tomar um copo, ler Machado de Assis).\n• **Ironia**: Dizer o oposto do que se pensa com intenção crítica.\n• **Anáfora**: Repetição de palavras no início de versos ou frases seguidas.",
+                        strategy: "Metonímia é muito cobrada em textos publicitários e tirinhas. Fique atento à relação entre a parte pelo todo.",
+                        trap: "Confundir Metáfora (comparação sem 'como') com Comparação/Símile (que usa explicitamente 'como', 'tal qual')."
+                    },
+                    {
+                        id: "port_4",
+                        topic: "Coesão e Coerência",
+                        question: "Qual a diferença entre Coesão Anafórica e Catafórica nos textos?",
+                        explanation: "• **Coesão Anafórica**: O termo retoma algo que já foi dito anteriormente no texto (ex: 'Maria saiu. **Ela** foi ao mercado').\n• **Coesão Catafórica**: O termo antecipa uma informação que ainda será apresentada (ex: 'O segredo é **este**: estudar diariamente').",
+                        strategy: "Pronomes demonstrativos: 'este/esta/isto' antecipam (catáfora); 'esse/essa/isso' retomam o que foi citado (anáfora).",
+                        trap: "Trocar o uso dos pronomes demonstrativos 'este' (futuro/próximo no texto) e 'esse' (passado/retomada)."
+                    },
+                    {
+                        id: "port_5",
+                        topic: "Regência e Crase",
+                        question: "Quais são as regras de crase mais cobradas na prova de Português?",
+                        explanation: "Crase é a fusão da preposição **a** com o artigo feminino **a**. Ocorre diante de palavras femininas que admitem artigo, em locuções adverbiais femininas ('à noite', 'à medida que') e diante de pronomes demonstrativos ('àquele').",
+                        strategy: "Substitua a palavra feminina por uma masculina correspondente: se virar **ao**, há crase! Ex: 'Vou à praia' -> 'Vou ao clube'.",
+                        trap: "Usar crase antes de verbos, palavras masculinas, pronomes pessoais e entre palavras repetidas ('dia a dia'). Nesses casos a crase é proibida!"
+                    },
+                    {
+                        id: "port_6",
+                        topic: "Pontuação Estratégica",
+                        question: "Em que situações o uso da vírgula altera completamente o sentido do texto?",
+                        explanation: "A vírgula separa elementos explicativos de restritivos. Exemplo: 'Os alunos, que estudaram, passaram' (todos estudaram - explicativa) VS 'Os alunos que estudaram passaram' (apenas os que estudaram passaram - restritiva).",
+                        strategy: "Em orações adjetivas, a presença da vírgula indica generalização/explicação; a ausência indica restrição/especificação.",
+                        trap: "Nunca separe o Sujeito do Verbo nem o Verbo do seu Complemento por vírgula direta!"
+                    },
+                    {
+                        id: "port_7",
+                        topic: "Gêneros e Tipos Textuais",
+                        question: "Qual é a diferença estrutural entre Tipo Textual e Gênero Textual?",
+                        explanation: "• **Tipo Textual**: Estrutura linguística fixa (Narrativo, Descritivo, Dissertativo, Expositivo, Injuntivo).\n• **Gênero Textual**: Textos concretos do cotidiano com função social (Notícia, Tirinha, Carta, Artigo de Opinião, Anúncio, Receita).",
+                        strategy: "Manuais e receitas usam o tipo Injuntivo (instrucional/imperativo). Artigos de opinião usam o tipo Dissertativo-Argumentativo.",
+                        trap: "Classificar 'Notícia' como tipo textual. Notícia é um **Gênero**, cujo tipo predominante é Expositivo/Informativo."
+                    },
+                    {
+                        id: "port_8",
+                        topic: "Ambiguidade e Polissemia",
+                        question: "Como identificar Ambiguidade involuntária versus Polissemia intencional?",
+                        explanation: "• **Polissemia**: Capacidade de uma palavra ter múltiplos sentidos coerentes dependendo do contexto (ex: 'manga' da camisa vs fruta).\n• **Ambiguidade**: Vício de linguagem onde a construção frasal gera duplo sentido confuso ou indesejado.",
+                        strategy: "Em anúncios e cartuns, a polissemia é usada como recurso estilístico humorístico ou persuasivo.",
+                        trap: "A ambiguidade pode ocorrer por má posição de pronomes ou advérbios (ex: 'O guarda prendeu o ladrão em sua casa' - casa de quem?)."
+                    }
+                ]
+            },
+            {
+                areaId: "linguagens",
+                areaName: "Linguagens e Suas Tecnologias",
+                areaIcon: "fa-pen-nib",
+                subjectId: "literatura",
+                subjectName: "Literatura Brasileira e Lusófona",
+                icon: "fa-book-open",
+                cards: [
+                    {
+                        id: "lit_1",
+                        topic: "Romantismo",
+                        question: "Quais são as três gerações da Poesia Romântica Brasileira no ENEM?",
+                        explanation: "1ª Geração (Nationalista/Indianista): Gonçalves Dias, exaltação da pátria e do índio idealizado.\n2ª Geração (Ultra-romântica/Mal do Século): Álvares de Azevedo, pessimismo, egocentrismo e morte.\n3ª Geração (Condoreira/Abolicionista): Castro Alves, poesia social, engajada e denúncia da escravidão.",
+                        strategy: "Ao ver poemas de Castro Alves ('O Navio Negreiro'), associe à luta abolicionista e à 3ª geração romântica.",
+                        trap: "Achar que o índio do Romantismo é retratado de forma realista. Ele é um herói medievalizado e idealizado."
+                    },
+                    {
+                        id: "lit_2",
+                        topic: "Realismo e Naturalismo",
+                        question: "Qual o contraste central entre o Realismo de Machado de Assis e o Naturalismo de Aluísio Azevedo?",
+                        explanation: "• **Realismo (Machado de Assis)**: Análise psicológica profunda, ironia, crítica à hipocrisia burguesa, leitor cúmplice.\n• **Naturalismo (Aluísio Azevedo - 'O Cortiço')**: Determinismo biológico e social, instinto animal, zoomorfização do ser humano e foco no coletivo/meio.",
+                        strategy: "Machado explora a dúvida e a subjetividade psicológica; o Naturalismo mostra o homem como produto do meio e da hereditariedade.",
+                        trap: "Acreditar que 'Dom Casmurro' confirma a traição de Capitu. A narrativa machadiana é pontuada pela dúvida e pelo narrador não confiável."
+                    },
+                    {
+                        id: "lit_3",
+                        topic: "Modernismo - 1ª Fase (1922)",
+                        question: "Quais foram as propostas da Semana de Arte Moderna de 1922 e da 1ª Fase Modernista?",
+                        explanation: "Ruptura radical com o passadismo/academicismo (parnasianismo), busca pela identidade nacional sem ufanismo ingênuo, linguagem coloquial, verso livre, ironia e a ideia de **Antropofagia** (Oswald de Andrade: deglutir a cultura estrangeira e reinterpretar à brasileira).",
+                        strategy: "Textos de Mário de Andrade e Oswald de Andrade focam no humor, na linguagem falada e no resgate do folclore nacional.",
+                        trap: "Achar que a 1ª fase rejeitava tudo do exterior. O objetivo era absorver (deglutir) o estrangeiro e transformar em arte genuinamente nacional."
+                    },
+                    {
+                        id: "lit_4",
+                        topic: "Modernismo - 2ª Fase (Geração de 30)",
+                        question: "O que caracteriza o Romance Regionalista de 30 e a Poesia da 2ª Fase Modernista?",
+                        explanation: "• **Prosa Regionalista**: Graciliano Ramos ('Vidas Secas'), Rachel de Queiroz ('O XV'), Jorge Amado. Denúncia da seca, do coronelismo e da miséria no Nordeste.\n• **Poesia**: Drummond, Vinicius de Moraes, Cecília Meireles. Foco na angústia existencial, reflexão social e 'sentimento do mundo'.",
+                        strategy: "Em 'Vidas Secas', a linguagem seca e direta espelha a aridez da caatinga e a interiorização penosa dos personagens.",
+                        trap: "Confundir o regionalismo do Romantismo (idealizado e exótico) com o Regionalismo de 30 (crítico, neorealista e social)."
+                    },
+                    {
+                        id: "lit_5",
+                        topic: "Modernismo - 3ª Fase (Geração de 45)",
+                        question: "Quais são as inovações estéticas de Guimarães Rosa e Clarice Lispector?",
+                        explanation: "• **Guimarães Rosa** ('Grande Sertão: Veredas'): Neologismos, reinventa a linguagem sertaneja elevando o sertão ao plano universal/metafísico.\n• **Clarice Lispector** ('A Hora da Estrela', 'Laços de Família'): Epifania, fluxo de consciência, introspecção feminina e crise existencial.",
+                        strategy: "Clarice foca na revelação interior (epifania) a partir de acontecimentos banais do cotidiano.",
+                        trap: "Achar que Guimarães Rosa retrata apenas a seca nordestina. Sua obra trata do sertão mineiro sob dimensão filosófica e universal."
+                    },
+                    {
+                        id: "lit_6",
+                        topic: "Concretismo e Tropicália",
+                        question: "Como a poesia concreta e a Tropicália reformularam a arte nos anos 1950-1970?",
+                        explanation: "• **Concretismo** (Irmãos Campos e Decio Pignatari): Valorização do espaço gráfico, fim do verso tradicional, integração verbo-voco-visual.\n• **Tropicália** (Caetano, Gil, Os Mutantes): Mistura de guitarras elétricas com ritmos regionais, crítica política velada sob a ditadura.",
+                        strategy: "Provas de linguagens associam poemas concretos a artes visuais e design gráfico.",
+                        trap: "Ignorar o caráter visual dos poemas concretos; a disposição espacial das palavras faz parte direta do significado."
+                    },
+                    {
+                        id: "lit_7",
+                        topic: "Barroco e Arcadismo",
+                        question: "Qual o contraste entre a dualidade do Barroco e o bucolismo do Arcadismo?",
+                        explanation: "• **Barroco** (Gregório de Matos, Padre Antônio Vieira): Dualidade corpo vs alma, pecado vs perdão, cultor de contrastes e metáforas (Jogo de Palavras / Conceptismo).\n• **Arcadismo** (Cláudio Manuel da Costa, Tomás Antônio Gonzaga): Neoclassicismo, *Fugere Urbem* (fuga da cidade), *Carpe Diem*, valorização da natureza simples.",
+                        strategy: "Expressões em latim como *Inutilia Truncat* (cortar o inútil) indicam estética Arcádia.",
+                        trap: "Confundir os sermões conceituais do Padre Antônio Vieira (prosa argumentativa) com a poesia satírica de Gregório de Matos."
+                    },
+                    {
+                        id: "lit_8",
+                        topic: "Literatura Contemporânea",
+                        question: "Quais são os traços marcantes da literatura brasileira contemporânea no ENEM?",
+                        explanation: "Hibridismo de linguagens, narrativa fragmentada, vozes periféricas e urbanas (Conceição Evaristo, Ferréz), autoficção, reflexão sobre identidade, violência urbana e redes sociais.",
+                        strategy: "Fique atento ao conceito de **Escrevivência** (Conceição Evaristo): a escrita alimentada pela vivência histórica e social da mulher negra.",
+                        trap: "Acreditar que a literatura contemporânea segue modelos rígidos tradicionais; ela se caracteriza pela pluralidade e quebra de fronteiras."
+                    }
+                ]
+            },
+            {
+                areaId: "linguagens",
+                areaName: "Linguagens e Suas Tecnologias",
+                areaIcon: "fa-pen-nib",
+                subjectId: "ingles_espanhol",
+                subjectName: "Língua Estrangeira (Inglês/Espanhol)",
+                icon: "fa-globe",
+                cards: [
+                    {
+                        id: "le_1",
+                        topic: "Falsos Cognatos (False Friends)",
+                        question: "Quais os falsos amigos mais perigosos em Inglês e Espanhol no ENEM?",
+                        explanation: "• **Inglês**: *Actually* = Na verdade (não atualmente); *Pretend* = Fingir (não pretender); *Push* = Empurrar (não puxar); *Novel* = Romance (não novela).\n• **Espanhol**: *Embarazada* = Grávida (não envergonhada); *Exquisito* = Delicioso/Refinado (não esquisito); *Todavía* = Ainda (não todavia); *Cachorro* = Filhote (não necessariamente cão).",
+                        strategy: "Sempre verifique o contexto da frase antes de traduzir palavras aparentemente idênticas ao português.",
+                        trap: "Traduzir palavras transparentes ao pé da letra sem checar o sentido global do período no texto."
+                    },
+                    {
+                        id: "le_2",
+                        topic: "Skimming e Scanning",
+                        question: "Como aplicar as técnicas de Skimming e Scanning para economizar tempo?",
+                        explanation: "• **Skimming**: Leitura rápida e panorâmica para captar a ideia geral, o tema e o objetivo do texto (título, subtítulo, 1º e último parágrafo).\n• **Scanning**: Varredura visual buscando palavras-chave específicas (datas, nomes, números, termos citados no enunciado da questão).",
+                        strategy: "Leia **primeiro o comando da questão e as alternativas**, depois vá ao texto com a técnica de Scanning para localizar o trecho exato.",
+                        trap: "Perder tempo traduzindo palavra por palavra do texto. O ENEM cobra interpretação e função textual!"
+                    },
+                    {
+                        id: "le_3",
+                        topic: "Conectivos Discursivos",
+                        question: "Quais conectivos de oposição e concessão aparecem com frequência nas provas?",
+                        explanation: "• **Inglês**: *However*, *Although*, *Even though*, *Despite*, *On the other hand*, *Nevertheless* (indicam contraste ou concessão).\n• **Espanhol**: *Sin embargo*, *No obstante*, *A pesar de*, *Pero*, *Aunque* (indicam oposição de ideias).",
+                        strategy: "Ao identificar esses conectivos no texto, saiba que a ideia principal ou a mudança de posicionamento do autor virá logo em seguida.",
+                        trap: "Confundir *Besides* (Além disso) com *Beside* (Ao lado de) em inglês, ou *Sin embargo* (No entanto) com 'sem embargo' em português."
+                    },
+                    {
+                        id: "le_4",
+                        topic: "Linguagem Não Verbal e Humor",
+                        question: "Como interpretar Charge, Cartum e Memes nas provas de Língua Estrangeira?",
+                        explanation: "A resposta correta sempre conecta os elementos visuais (expressões faciais, gestos, cenário) com os balões de fala e os recursos irônicos ou de crítica social.",
+                        strategy: "Procure por quebras de expectativa na última tirinha ou metáforas visuais que critiquem o uso excessivo de tecnologia, consumismo ou política.",
+                        trap: "Focar apenas na leitura do texto verbal e ignorar o detalhe gráfico do desenho."
+                    },
+                    {
+                        id: "le_5",
+                        topic: "Anáfora e Referência Pronominal",
+                        question: "Como descobrir a quem pronomes como 'It', 'They', 'Which' ou 'Su/Sus' se referem?",
+                        explanation: "Esses pronomes evitam repetições desnecessárias. Para achar o referente, volte às orações imediatamente anteriores e substitua o pronome pelo substantivo candidato para testar a coerência sintática.",
+                        strategy: "Na dúvida, faça a substituição direta dentro da frase do texto para ver qual palavra mantém o sentido lógico.",
+                        trap: "Assumir que 'They' em inglês se refere exclusivamente a pessoas no plural; ele também é usado para objetos, animais ou pronome neutro singular."
+                    },
+                    {
+                        id: "le_6",
+                        topic: "Vocabulário Socioambiental",
+                        question: "Quais temas e vocabulários são recorrentes em textos jornalísticos e científicos do ENEM?",
+                        explanation: "Temas como aquecimento global (*Global warming / Calentamiento global*), inteligência artificial, redes sociais, inclusão, sustentabilidade e desigualdade de gênero são temas padrão do INEP.",
+                        strategy: "Aprenda famílias de palavras ligadas a meio ambiente (*renewable, footprint, species, drought, medio ambiente*).",
+                        trap: "Achar que os textos abordam temas fúteis. O ENEM prefere artigos de opinião de portais como BBC, The Guardian, El País."
+                    },
+                    {
+                        id: "le_7",
+                        topic: "Voz Passiva e Discurso Indireto",
+                        question: "Por que a Voz Passiva é tão utilizada em artigos científicos em inglês/espanhol?",
+                        explanation: "A voz passiva é usada para dar objetividade e foco na **ação ou no resultado do experimento**, ocultando ou secundarizando quem realizou a ação (ex: *The study was conducted...* / *Se investigaron los resultados...*).",
+                        strategy: "Ao ler *'It is believed that...'* ou *'Se considera que...'*, entenda que se trata de uma visão consensual ou científica ampla.",
+                        trap: "Confundir a partícula passiva 'se' do espanhol (*Se vende*) com conjunção condicional (*Si estudias...*)."
+                    },
+                    {
+                        id: "le_8",
+                        topic: "Ironia e Intenção do Autor",
+                        question: "Como captar o tom do autor (crítico, sarcástico, informativo ou neutro)?",
+                        explanation: "O tom do autor é revelado por adjetivos qualificativos, advérbios de modo, uso de aspas (para indicar ironia ou citação alheia) e perguntas retóricas ao longo do artigo.",
+                        strategy: "Se o enunciado perguntar o 'propósito do texto', busque verbos no infinitivo nas alternativas (ex: alertar, denunciar, conscientizar, divulgar).",
+                        trap: "Escolher alternativas com opiniões extremistas quando o texto fonte possui tom estritamente acadêmico e equilibrado."
+                    }
+                ]
+            },
+            {
+                areaId: "linguagens",
+                areaName: "Linguagens e Suas Tecnologias",
+                areaIcon: "fa-pen-nib",
+                subjectId: "artes",
+                subjectName: "Artes e Patrimônio Cultural",
+                icon: "fa-palette",
+                cards: [
+                    {
+                        id: "art_1",
+                        topic: "Vanguardas Europeias",
+                        question: "Como diferenciar Cubismo, Surrealismo, Dadaísmo e Futurismo no ENEM?",
+                        explanation: "• **Cubismo**: Geometrização da forma e multiplicidade de pontos de vista (Picasso).\n• **Surrealismo**: Inconsciente, sonhos, ilógico (Salvador Dalí).\n• **Dadaísmo**: Anti-arte, ilogicidade, *Ready-mades* (Marcel Duchamp e a fonte/urinol).\n• **Futurismo**: Exaltação da máquina, velocidade e tecnologia industrial.",
+                        strategy: "Duchamp e o Dadaísmo questionam o próprio conceito de 'o que é arte' através do descolamento do objeto do seu uso cotidiano.",
+                        trap: "Confundir Impressionismo (estudo da luz natural ao ar livre) com Expressionismo (deformação da realidade para expressar angústia interna)."
+                    },
+                    {
+                        id: "art_2",
+                        topic: "Arte Contemporânea Brasileira",
+                        question: "O que define a arte participativa de Hélio Oiticica e Lygia Clark?",
+                        explanation: "Ruptura com o suporte tradicional (tela/cavalete). O espectador deixa de ser mero contemplador e passa a ser **participador** ativamente da obra. Exemplos: Os *Parangolés* de Oiticica (capas vestíveis) e os *Bichos* de Lygia Clark (esculturas articuláveis).",
+                        strategy: "Questões sobre Arte Contemporânea valorizam o conceito de interatividade, experiência sensorial e ressignificação de espaços.",
+                        trap: "Achar que obras contemporâneas exigem técnica acadêmica clássica; o foco está no conceito e na experiência."
+                    },
+                    {
+                        id: "art_3",
+                        topic: "Patrimônio Cultural",
+                        question: "Qual é a diferença entre Patrimônio Cultural Material e Imaterial segundo o IPHAN?",
+                        explanation: "• **Material**: Bens tangíveis com valor histórico, arquitetônico e artístico (cidades históricas como Ouro Preto, estátuas, monumentos).\n• **Imaterial**: Práticas, saberes, celebrações e modos de fazer transmitidos pelas gerações (Frevo, Capoeira, Ofício das Baianas do Acarajé, Modo de Fazer o Queijo de Minas).",
+                        strategy: "A preservação do patrimônio imaterial foca na manutenção das tradições vivas das comunidades.",
+                        trap: "Acreditar que patrimônio cultural envolve apenas monumentos de pedra e cal. O patrimônio imaterial é vivo e dinâmico."
+                    },
+                    {
+                        id: "art_4",
+                        topic: "Arte Afro-brasileira",
+                        question: "Como a arte afro-brasileira é reconhecida e cobrada no ENEM?",
+                        explanation: "Compreende a resistência cultural, ressignificação do sagrado (sincretismo religioso), revalorização do corpo e matrizes estéticas ancestrais no desenvolvimento da identidade visual e musical brasileira (Mestre Didi, Rubem Valentim).",
+                        strategy: "Associe as produções artísticas afro-brasileiras ao combate ao racismo estrutural e à valorização da memória coletiva.",
+                        trap: "Reduzir a arte afro-brasileira ao mero folclore ingênuo, desconsiderando sua dimensão política e estética elaborada."
+                    },
+                    {
+                        id: "art_5",
+                        topic: "Arte Urbana e Grafite",
+                        question: "Qual a diferença entre Pixação e Grafite e como a arte urbana ressignifica a cidade?",
+                        explanation: "O Grafite é reconhecido como intervenção artística visual que democratiza o acesso à arte, ocupando muros públicos e promovendo reflexão crítica social. A pixação tem caráter de demarcação territorial e protesto tipográfico marginalizado.",
+                        strategy: "O ENEM enxerga o Grafite como expressão poética e política democrática no espaço urbano.",
+                        trap: "Tratar todo grafite urbano como mero vandalismo; a prova valoriza a arte de rua como manifestação legítima."
+                    },
+                    {
+                        id: "art_6",
+                        topic: "Elementos Visuais",
+                        question: "Como elementos como cor, linha, textura e perspectiva constroem sentido na imagem?",
+                        explanation: "A perspectiva cênica cria a ilusão de tridimensionalidade em superfícies planas (desenvolvida no Renascimento). Cores quentes provocam sensação de aproximação/energia, enquanto cores frias sugerem distanciamento ou melancolia.",
+                        strategy: "Analise a composição geométrica do quadro para entender a hierarquia visual dos personagens.",
+                        trap: "Ignorar o contraste entre luz e sombra em obras Barrocas (Chiaroscuro / Caravaggio)."
+                    },
+                    {
+                        id: "art_7",
+                        topic: "Música Popular Brasileira",
+                        question: "Como ritmos como Samba, Frevo e Maracatu dialogam com a história social do Brasil?",
+                        explanation: "Essas manifestações musicais nasceram de contextos de resistência periférica, libertação corporal e afirmação comunitária contra a marginalização histórica impostas a trabalhadores e populações escravizadas.",
+                        strategy: "Associe a origem do samba e do maracatu às redes de solidariedade comunitária da população negra urbana.",
+                        trap: "Desvincular a história da MPB dos momentos de repressão política e protesto social durante a Ditadura Militar."
+                    },
+                    {
+                        id: "art_8",
+                        topic: "Arte Pré-Colombiana e Indígena",
+                        question: "Quais os atributos estéticos e funcionais da arte indígena no Brasil?",
+                        explanation: "Na arte indígena, a estética não se separa da funcionalidade ritual ou do uso cotidiano. Exemplos: pintura corporal (com urucum e jenipapo), arte plumária e cerâmica (como a cerâmica Marajoara e Tapajônica).",
+                        strategy: "A pintura corporal indígena indica pertencimento social, estado civil, ritos de passagem e identidade do grupo.",
+                        trap: "Achar que a arte indígena é uma produção do passado ou 'fossilizada'; ela continua viva e em constante transformação."
+                    }
+                ]
+            },
+            {
+                areaId: "linguagens",
+                areaName: "Linguagens e Suas Tecnologias",
+                areaIcon: "fa-pen-nib",
+                subjectId: "educacao_fisica",
+                subjectName: "Educação Física e Práticas Corporais",
+                icon: "fa-person-running",
+                cards: [
+                    {
+                        id: "ef_1",
+                        topic: "Esporte e Sociedade",
+                        question: "Qual a diferença entre Esporte de Rendimento e Esporte de Lazer/Escolar?",
+                        explanation: "• **Esporte de Rendimento**: Foco em vitórias, recordes, regras rígidas universais, espetacularização e mercantilização.\n• **Esporte de Lazer/Escolar**: Foco na inclusão, participação, cooperatividade, saúde e adaptação flexível das regras aos praticantes.",
+                        strategy: "Questões do ENEM priorizam o esporte como ferramenta de inclusão social, cidadania e saúde coletiva.",
+                        trap: "Supervalorizar a competição e a busca pelo alto rendimento como única meta da Educação Física."
+                    },
+                    {
+                        id: "ef_2",
+                        topic: "Padrões de Beleza e Corpo",
+                        question: "Como a mídia e a indústria cultural influenciam a construção da imagem corporal?",
+                        explanation: "A mídia frequentemente difunde padrões inalcançáveis de beleza, associando a magreza extrema ou a hipertrofia exagerada ao sucesso e à felicidade. Isso impulsiona transtornos corporais (como dismorfia muscular e vigorexia) e o consumo exacerbado de procedimentos estéticos.",
+                        strategy: "Procure alternativas que façam a crítica à mercantilização do corpo e defendam a diversidade de corpos.",
+                        trap: "Acreditar que ter um 'corpo sarado' é sinônimo automático de saúde biológica e psicológica integral."
+                    },
+                    {
+                        id: "ef_3",
+                        topic: "Anabolizantes e Doping",
+                        question: "Quais os impactos do uso indevido de esteroides anabolizantes e substâncias dopantes?",
+                        explanation: "O uso estético ou para alto rendimento causa graves desequilíbrios hormonais, problemas cardiovasculares, danos hepáticos e alteração de comportamento. No esporte profissional, o doping fere o princípio da 'ética e igualdade de condições' (*fair play*).",
+                        strategy: "O ENEM aborda o doping tanto pelo lado do risco à saúde pública quanto pela perda do sentido ético do esporte.",
+                        trap: "Confundir suplementos alimentares regulamentados com substâncias hormonais ilícitas/doping."
+                    },
+                    {
+                        id: "ef_4",
+                        topic: "Práticas Corporais de Aventura",
+                        question: "O que caracteriza as Práticas Corporais de Aventura Urbanas e na Natureza?",
+                        explanation: "Práticas de Aventura buscam sensações de risco calculado, vertigem e integração com o meio ambiente ou ambiente urbano (ex: Skate, Parkour, Rapel, Escalada, Surf, Slackline).",
+                        strategy: "A inclusão do Skate e da Escalada nos Jogos Olímpicos reforçou o debate sobre a esportivização de práticas de rua.",
+                        trap: "Considerar que práticas de aventura não possuem regras ou exigência de equipamentos de segurança."
+                    },
+                    {
+                        id: "ef_5",
+                        topic: "Jogos Populares vs Esportes",
+                        question: "Qual é a distinção conceitual entre Jogo Popular e Esporte Formal?",
+                        explanation: "• **Jogo Popular**: Regras flexíveis criadas no momento pelos participantes, sem necessidade de espaço oficial (ex: Queimada, Amarelinha, Tacobol).\n• **Esporte**: Regras fixas estabelecidas por federações internacionais, espaço padronizado e arbitragem.",
+                        strategy: "O jogo valoriza a ludicidade e o resgate da cultura popular comunitária.",
+                        trap: "Achar que todo jogo é um esporte. Para ser esporte precisa haver institucionalização por federações."
+                    },
+                    {
+                        id: "ef_6",
+                        topic: "Saúde e Sedentarismo",
+                        question: "Qual o papel do exercício físico na prevenção de Doenças Crônicas Não Transmissíveis (DCNT)?",
+                        explanation: "A prática regular de atividade física previne e auxilia no tratamento de hipertensão, diabetes tipo 2, obesidade e depressão, reduzindo gastos no Sistema Único de Saúde (SUS).",
+                        strategy: "O ENEM aborda a atividade física como política pública de promoção da saúde coletiva e qualidade de vida.",
+                        trap: "Confundir 'Atividade Física' (qualquer movimento corporal que gaste energia) com 'Exercício Físico' (atividade planejada e estruturada)."
+                    },
+                    {
+                        id: "ef_7",
+                        topic: "Dança e Expressão Cultural",
+                        question: "Como as danças afro-brasileiras e urbanas atuam na afirmação de identidades?",
+                        explanation: "A dança é uma linguagem corporal poética e política. Estilos como Hip-Hop (Break), Frevo e Passinho do Funk funcionam como instrumentos de resistência, integração comunitária e ocupação de espaços públicos por jovens da periferia.",
+                        strategy: "Veja a dança não apenas como atividade estética, mas como patrimônio cultural e comunicação não verbal.",
+                        trap: "Classificar manifestações culturais populares como meras 'atividades de lazer secundárias'."
+                    },
+                    {
+                        id: "ef_8",
+                        topic: "Lutas vs Violência",
+                        question: "Como o ENEM diferencia a prática de Lutas / Artes Marciais da Violência física?",
+                        explanation: "• **Lutas**: Possuem regras, filosofia de respeito ao oponente, controle corporal, ética e ambiente apropriado.\n• **Violência**: Agressão intencional fora de regras, com o objetivo de ferir sem consentimento ou respeito ético.",
+                        strategy: "Artes marciais promovem autocontrol e disciplina, sendo opostas à briga ou violência urbana.",
+                        trap: "Associar automaticamente lutas esportivas (como Judô ou Capoeira) ao incentivo da violência nas ruas."
+                    }
+                ]
+            },
+
+            // ==========================================
+            // 2. CIÊNCIAS HUMANAS E SUAS TECNOLOGIAS
+            // ==========================================
+            {
+                areaId: "humanas",
+                areaName: "Ciências Humanas e Suas Tecnologias",
+                areaIcon: "fa-landmark",
+                subjectId: "historia",
+                subjectName: "História (Brasil e Geral)",
+                icon: "fa-clock-rotate-left",
+                cards: [
+                    {
+                        id: "his_1",
+                        topic: "Brasil Colônia",
+                        question: "Como funcionava o Pacto Colonial e a Economia Açucareira com mão de obra escravizada?",
+                        explanation: "O Pacto Colonial (Exclusivo Metropolitano) obrigava a colônia a vender matérias-primas baratas para Portugal e comprar produtos manufaturados caros. A economia do açúcar baseava-se no latifúndio, na monocultura voltada à exportação e na brutal exploração do trabalho escravizado de indígenas e africanos.",
+                        strategy: "O ENEM foca muito no impacto social da escravidão como estruturador das desigualdades no Brasil atual.",
+                        trap: "Acreditar que o Pacto Colonial era um contrato negociado de forma amigável; tratava-se de imposição mercantilista rígida."
+                    },
+                    {
+                        id: "his_2",
+                        topic: "Segundo Reinado (1840-1889)",
+                        question: "Quais fatores levaram à crise da Monarquia e à Proclamação da República no Brasil?",
+                        explanation: "O desgaste do governo de D. Pedro II ocorreu pelo rompimento com três pilares: a **Igreja** (Questão Religiosa), o **Exército** (fortalecido após a Guerra do Paraguai e adepto do Positivismo) e os **Barões do Café** (que abandonaram o imperador após a Lei Áurea de 1888).",
+                        strategy: "A Proclamação da República (1889) foi um golpe promovido por elites militares e cafeicultores, sem participação popular direta ('o povo assistiu bestializado').",
+                        trap: "Pensar que a República nasceu de uma revolução popular democrática."
+                    },
+                    {
+                        id: "his_3",
+                        topic: "Era Vargas (1930-1945)",
+                        question: "Como Getúlio Vargas utilizou o Trabalhismo e o DIP para consolidar sua imagem?",
+                        explanation: "Vargas criou a CLT e concedeu direitos trabalhistas históricos (férias, salário mínimo), construindo a imagem de 'Pai dos Pobres'. Por meio do **DIP (Departamento de Imprensa e Propaganda)**, censurou a oposição e disseminou o culto à sua personalidade através do rádio (Hora do Brasil) e do civismo.",
+                        strategy: "Associe a Era Vargas à industrialização por substituição de importações e à forte presença do Estado na economia.",
+                        trap: "Esquecer que o Estado Novo (1937-1945) foi uma ditadura autoritária com censura, tortura e fechamento do Congresso."
+                    },
+                    {
+                        id: "his_4",
+                        topic: "Ditadura Militar (1964-1985)",
+                        question: "O que foi o AI-5 (1968) e como se caracterizou o chamado 'Milagre Econômico'?",
+                        explanation: "• **AI-5**: Ato Institucional nº 5, o período mais repressivo da ditadura, que fechou o Congresso, suspendeu o *habeas corpus* e legitimou a censura e a tortura.\n• **Milagre Econômico**: Crescimento do PIB com crédito externo, mas com forte concentração de renda e endividamento ('fazer o bolo crescer para depois dividir').",
+                        strategy: "O processo de abertura política foi marcado por ser 'lento, gradual e seguro' promovido pelos próprios generais Geisel e Figueiredo.",
+                        trap: "Acreditar que o Milagre Econômico reduziu a desigualdade social no Brasil; na verdade, a concentração de renda aumentou drasticamente."
+                    },
+                    {
+                        id: "his_5",
+                        topic: "Antiguidade Clássica",
+                        question: "Qual a diferença entre a Democracia Ateniense e a República Romana?",
+                        explanation: "• **Atenas**: Democracia **direta** (cidadãos votavam na Ágora), mas restrita (apenas homens livres, adultos, atenienses, excluindo mulheres, escravos e estrangeiros).\n• **Roma**: República **representativa**, dominada inicialmente pelos Patrícios no Senado, com conflitos intensos contra os Plebeus.",
+                        strategy: "Ao comparar com a democracia moderna, note que a ateniense não era universal nem representativa.",
+                        trap: "Achando que a democracia ateniense era inclusiva para toda a população residente na cidade."
+                    },
+                    {
+                        id: "his_6",
+                        topic: "Feudalismo e Idade Moderna",
+                        question: "Como ocorreu a transição do Feudalismo para o Capitalismo Comercial?",
+                        explanation: "O renascimento comercial e urbano (Séculos XII-XIV), o surgimento da Burguesia, a crise do sistema feudal (Peste Negra, Fome e Revoltas Camponesas) e a centralização do poder nos Estados Nacionais Absolutistas pavimentaram as Grandes Navegações e o Mercantilismo.",
+                        strategy: "O Mercantilismo visava ao acúmulo de metais preciosos (metalismo) e à balança comercial favorável.",
+                        trap: "Achar que o Feudalismo acabou de um dia para o outro; foi um processo gradual de séculos."
+                    },
+                    {
+                        id: "his_7",
+                        topic: "Revolução Industrial e Imperialismo",
+                        question: "Como o Neocolonialismo/Imperialismo do Século XIX se justificou ideologicamente?",
+                        explanation: "As potências europeias justificaram a Partilha da África e da Ásia (Conferência de Berlim - 1884) através da ideologia da **'Missão Civilizadora'** e do **Darwinismo Social** (a falsa ideia de que a 'raça branca' era superior e devia levar o 'progresso' aos povos considerados 'atrasados').",
+                        strategy: "Imperialismo buscou matérias-primas, mão de obra barata e mercados consumidores para os produtos industriais europeus.",
+                        trap: "Confundir a colonização da América no Século XVI (Mercantilista) com o Neocolonialismo da África/Ásia no Século XIX (Industrial)."
+                    },
+                    {
+                        id: "his_8",
+                        topic: "Guerras Mundiais e Guerra Fria",
+                        question: "O que definiu a lógica da Guerra Fria e a Doutrina da Destruição Mútua Assegurada?",
+                        explanation: "Conflito ideológico, econômico e militar indireto entre EUA (Capitalismo) e URSS (Socialismo). A corrida armamentista e nuclear criou o equilíbrio pelo terror: qualquer ataque direto levaria à aniquilação atômica planetária. Os conflitos ocorreram na periferia (Guerra da Coreia, Vietnã, Crise dos Mísseis).",
+                        strategy: "Fique atento à criação da ONU (1945) para evitar novos conflitos globais e à divisão da Europa na Cortina de Ferro.",
+                        trap: "Acreditar que não houve mortes na Guerra Fria; houve milhões de mortos em guerras por procuração (*proxy wars*)."
+                    }
+                ]
+            },
+            {
+                areaId: "humanas",
+                areaName: "Ciências Humanas e Suas Tecnologias",
+                areaIcon: "fa-landmark",
+                subjectId: "geografia",
+                subjectName: "Geografia Geral e do Brasil",
+                icon: "fa-earth-americas",
+                cards: [
+                    {
+                        id: "geo_1",
+                        topic: "Demografia Brasileira",
+                        question: "O que é a Transição Demográfica e o Bônus Demográfico no Brasil atual?",
+                        explanation: "• **Transição Demográfica**: Queda das taxas de mortalidade seguida pela queda acentuada na natalidade/fecundidade, levando ao envelhecimento populacional.\n• **Bônus Demográfico**: Período em que o número de pessoas em idade ativa (PIA) é maior do que o número de dependentes (crianças e idosos). O Brasil vive o final dessa janela estratégica.",
+                        strategy: "O envelhecimento populacional exige reformas na previdência e maiores investimentos na saúde geriátrica.",
+                        trap: "Achar que a população brasileira está diminuindo atualmente; a taxa de crescimento reduziu, mas a população total ainda não encolheu."
+                    },
+                    {
+                        id: "geo_2",
+                        topic: "Urbanização e Problemas Urbanos",
+                        question: "Qual a diferença entre Gentrificação, Segregação Socioespacial e Macrocefalia Urbana?",
+                        explanation: "• **Gentrificação**: Valorização imobiliária que expulsando moradores de baixa renda de bairros centrais/reformados.\n• **Segregação Socioespacial**: Divisão do espaço urbano onde elites e classes populares ocupam áreas com níveis abissais de infraestrutura.\n• **Macrocefalia Urbana**: Crescimento desordenado das cidades gerando saturação de serviços básicos.",
+                        strategy: "A urbanização brasileira foi **rápida e desordenada**, impulsionada pelo êxodo rural na 2ª metade do século XX.",
+                        trap: "Confundir Gentrificação com mera melhoria urbana benevolente; ela envolve elitização do espaço e deslocamento forçado."
+                    },
+                    {
+                        id: "geo_3",
+                        topic: "Agronegócio e Fronteira Agrícola",
+                        question: "Como o avanço da Fronteira Agrícola afeta o Cerrado e a Amazônia (Arco do Desmatamento)?",
+                        explanation: "A expansão da monocultura de soja e da pecuária extensiva rumo ao Centro-Oeste e Norte devasta ecossistemas nativos. No Cerrado, a técnica da **calagem** (correção da acidez do solo) viabilizou o agronegócio de exportação, gerando conflitos territoriais com povos tradicionais.",
+                        strategy: "Identifique o bioma Cerrado como o 'berço das águas' do Brasil, fortemente impactado pela irrigação intensiva.",
+                        trap: "Achar que o solo original do Cerrado era naturalmente fértil; ele exigiu correção química maciça com calcário."
+                    },
+                    {
+                        id: "geo_4",
+                        topic: "Climatologia e Impactos Ambientais",
+                        question: "Como funcionam os fenômenos El Niño, La Niña e as Ilhas de Calor?",
+                        explanation: "• **El Niño**: Aquecimento anormal das águas do Oceano Pacífico Equatorial -> Seca no Norte/Nordeste e chuvas excessivas no Sul do Brasil.\n• **La Niña**: Resfriamento das águas do Pacífico -> Efeito inverso.\n• **Ilhas de Calor**: Fenômeno microclimático urbano causado por excesso de asfalto, concreto e escassez de vegetação.",
+                        strategy: "Inversão térmica ocorre no **inverno** nas metrópoles, aprisionando poluentes perto do solo e piorando doenças respiratórias.",
+                        trap: "Confundir Efeito Estufa (fenômeno natural vital para a vida) com Aquecimento Global (intensificação do efeito estufa por ação humana)."
+                    },
+                    {
+                        id: "geo_5",
+                        topic: "Geomorfologia e Solos",
+                        question: "Quais os impactos da Erosão, Lixiviação e Arenização nos solos agrícolas?",
+                        explanation: "• **Lixiviação**: 'Lavagem' dos nutrientes da camada superficial do solo pela água das chuvas em solos desmatados.\n• **Voçoroca**: Grandes fendas causadas por erosão hídrica profunda.\n• **Arenização**: Exposição do substrato arenoso no Rio Grande do Sul devido ao sobrepastoreio e manejo inadequado.",
+                        strategy: "Curvas de nível e plantio direto são técnicas agrícolas sustentáveis para combater a erosão hídrica.",
+                        trap: "Confundir Arenização (no bioma Pampa) com Desertificação (em áreas semiáridas afetadas por seca extrema e degradação)."
+                    },
+                    {
+                        id: "geo_6",
+                        topic: "Globalização e Transportes",
+                        question: "Por que a matriz de transportes brasileira é considerada historicamente desequilibrada?",
+                        explanation: "O Brasil priorizou o modal **rodoviário** a partir do governo JK (anos 1950), em detrimento dos modais ferroviário e hidroviário (mais baratos e eficientes para longas distâncias). Isso encarece o 'Custo Brasil' e gera alta dependência do petróleo.",
+                        strategy: "Para grandes cargas e longas distâncias em países continentais, ferrovias e hidrovia são os modais mais sustentáveis e econômicos.",
+                        trap: "Acreditar que o modal rodoviário é o mais barato para o transporte de grãos e minérios a longas distâncias."
+                    },
+                    {
+                        id: "geo_7",
+                        topic: "Matriz Energética",
+                        question: "Como se comparam as matrizes energéticas e elétricas do Brasil com as do mundo?",
+                        explanation: "O Brasil possui uma matriz elétrica predominantemente **renovável** (cerca de 80%, liderada pela fonte Hidrelétrica, seguida por Eólica e Solar). No entanto, sua matriz **energética** geral ainda consome derivados de petróleo e gás no setor de transportes e indústrias.",
+                        strategy: "Em períodos de seca severa, o Brasil aciona as usinas Termelétricas (mais poluidoras e caras -> bandeiras tarifárias na conta de luz).",
+                        trap: "Confundir Matriz **Elétrica** (energia para eletricidade) com Matriz **Energética** (todas as fontes de energia, incluindo combustíveis)."
+                    },
+                    {
+                        id: "geo_8",
+                        topic: "Cartografia e Projeções",
+                        question: "Qual o viés ideológico das Projeções Cartográficas de Mercator e Peters?",
+                        explanation: "• **Projeção de Mercator (Conforme)**: Mantém as formas dos continentes, mas distorce as áreas, agigantando os países do Hemisfério Norte (visão Eurocêntrica).\n• **Projeção de Peters (Equivalente)**: Mantém a proporção real das áreas, mas deforma os formatos dos continentes, valorizando o 'Terceiro Mundo' (visão Terceiro-Mundista).",
+                        strategy: "Nenhuma projeção em mapa plano consegue ser 100% fiel ao globo sem gerar alguma distorção gráfica.",
+                        trap: "Acreditar que existe um mapa mundi perfeito sem distorção geográfica. Toda projeção escolhe o que priorizar."
+                    }
+                ]
+            },
+            {
+                areaId: "humanas",
+                areaName: "Ciências Humanas e Suas Tecnologias",
+                areaIcon: "fa-landmark",
+                subjectId: "filosofia",
+                subjectName: "Filosofia Geral e Política",
+                icon: "fa-brain",
+                cards: [
+                    {
+                        id: "fil_1",
+                        topic: "Filosofia Clássica",
+                        question: "Qual é o centro das teorias de Platão (Mundo das Ideias) e Aristóteles (Ética e Pólis)?",
+                        explanation: "• **Platão**: Dualismo. O Mundo Sensível é uma ilusão de sombras; o conhecimento verdadeiro está no Mundo das Ideias (Alegoria da Caverna).\n• **Aristóteles**: Empirismo e Realismo. O conhecimento começa na experiência sensível. Propõe a Ética do Meio-Termo (virtude justa justa) e o homem como 'Animal Político'.",
+                        strategy: "Platão valoriza a razão pura e as ideias inatas; Aristóteles valoriza a observação empírica da natureza e da sociedade.",
+                        trap: "Achar que Aristóteles desprezava a razão. Ele apenas acreditava que a razão opera a partir dos dados trazidos pelos sentidos."
+                    },
+                    {
+                        id: "fil_2",
+                        topic: "Filosofia Medieval",
+                        question: "Como se dá a síntese entre Fé e Razão na Patrística (Agostinho) e Escolástica (Tomás de Aquino)?",
+                        explanation: "• **Santo Agostinho (Patrística)**: Influenciado por Platão. 'Crer para compreender'. Teoria da Iluminação Divina e Livre-Arbítrio.\n• **São Tomás de Aquino (Escolástica)**: Influenciado por Aristóteles. Usa a razão pura para demonstrar as 5 vias da existência de Deus.",
+                        strategy: "A Escolástica concilia a fé cristã com a filosofia racional clássica grega no ambiente das primeiras universidades.",
+                        trap: "Acreditar que a Filosofia Medieval rejeitava a razão; ela usava a razão como ferramenta a serviço da Fé."
+                    },
+                    {
+                        id: "fil_3",
+                        topic: "Racionalismo vs Empirismo",
+                        question: "Como o 'Penso, logo existo' de Descartes se opõe à 'Tábula Rasa' de John Locke?",
+                        explanation: "• **Descartes (Racionalismo)**: A dúvida metódica leva à primeira certeza inquestionável (*Cogito, ergo sum*). A razão pura e as ideias inatas são a fonte do conhecimento verdadeiro.\n• **John Locke (Empirismo)**: A mente humana nasce como uma 'folha em branco' (*Tábula Rasa*); todo conhecimento vem dos sentidos e da experiência.",
+                        strategy: "Racionalismo busca ideias inatas matematicamente dedutíveis; Empirismo baseia-se na indução experimental.",
+                        trap: "Confundir a dúvida metódica de Descartes (recurso provisório para achar a verdade) com o ceticismo radical (que nega a verdade)."
+                    },
+                    {
+                        id: "fil_4",
+                        topic: "Contratualismo Político",
+                        question: "Como Hobbes, Locke e Rousseau enxergam o Estado de Natureza e o Contrato Social?",
+                        explanation: "• **Hobbes**: O homem no estado de natureza é o 'lobo do próprio homem' (guerra de todos contra todos). O Contrato exige um Estado Absolutista forte (Leviatã) para garantir a paz.\n• **Locke**: O homem tem direitos naturais (vida, liberdade, propriedade). O Estado deve ser Liberal para proteger esses direitos.\n• **Rousseau**: O homem nasce bom, a sociedade o corrompe com a propriedade privada. O Contrato deve buscar a Vontade Geral e a Democracia.",
+                        strategy: "Locke é o pai do Liberalismo Político; Hobbes defende o Absolutismo; Rousseau defende a soberania popular direta.",
+                        trap: "Confundir a visão pessimista de Hobbes sobre a natureza humana com a visão otimista do 'bom selvagem' de Rousseau."
+                    },
+                    {
+                        id: "fil_5",
+                        topic: "Immanuel Kant",
+                        question: "O que é o Imperativo Categórico e o Esclarecimento (*Aufklärung*) na filosofia kantiana?",
+                        explanation: "• **Imperativo Categórico**: Agir sempre segundo uma máxima que você possa desejar que se torne uma lei universal. A ética do dever pelo dever, sem segundas intenções egoístas.\n• **Esclarecimento**: A saída do homem da sua menoridade intelectual mediante a coragem de pensar por si mesmo (*Sapere Aude!*).",
+                        strategy: "Para Kant, o ser humano é um fim em si mesmo e nunca deve ser usado como um mero meio para atingir objetivos.",
+                        trap: "Confundir a ética deontológica de Kant (ética do dever moral incondicional) com o Utilitarismo (que avalia a ação pelas consequências ou utilidade)."
+                    },
+                    {
+                        id: "fil_6",
+                        topic: "Friedrich Nietzsche",
+                        question: "Quais são as críticas de Nietzsche à moral cristã, ao niilismo e ao conceito de 'Além do Homem'?",
+                        explanation: "Nietzsche critica a moral tradicional cristã e ocidental por considerar uma 'moral de rebanho/escravos' que nega os instintos da vida. Propõe a **Vontade de Potência**, o combate ao niilismo passivo e a superação dos valores tradicionais (*Amor Fati*).",
+                        strategy: "Associe Nietzsche à crítica ferrenha ao racionalismo socrático e à metafísica platônica.",
+                        trap: "Distorções históricas associaram erroneamente Nietzsche ao nazismo; sua filosofia repudia o nacionalismo cego e o antissemitismo."
+                    },
+                    {
+                        id: "fil_7",
+                        topic: "Escola de Frankfurt",
+                        question: "Como Adorno e Horkheimer conceituam a 'Indústria Cultural' e a degradação da arte?",
+                        explanation: "A Indústria Cultural transforma a arte e a cultura em mercadorias padronizadas e produzidas em série. O objetivo é o lucro e a massificação, gerando entretenimento passivo que anestesia a consciência crítica do cidadão trabalhador.",
+                        strategy: "Em questões sobre redes sociais e cultura pop no ENEM, a Indústria Cultural é um repertório recorrente.",
+                        trap: "Confundir 'Cultura Popular' (produzida espontaneamente pelo povo) com 'Indústria Cultural' (produzida por corporações para consumo de massa)."
+                    },
+                    {
+                        id: "fil_8",
+                        topic: "Filosofia Política Contemporânea",
+                        question: "Como Hannah Arendt explica a 'Banalidade do Mal' e Foucault aborda o 'Biopoder'?",
+                        explanation: "• **Hannah Arendt**: O mal pode ser praticado por burocratas comuns que simplesmente cumprem ordens sem refletir criticamente sobre as consequências de seus atos (Análise do julgamento do nazista Eichmann).\n• **Michel Foucault**: O Biopoder é o exercício do poder estatal diretamente focado no controle biológico dos corpos das populações (saúde, natalidade, vigilância disciplinar).",
+                        strategy: "Arendt destaca a perda da capacidade de julgamento moral no totalitarismo; Foucault mostra o poder descentralizado em instituições (prisões, hospitais, escolas).",
+                        trap: "Achar que a Banalidade do Mal relativiza os crimes; na verdade, mostra a periculosidade da ausência do pensamento crítico."
+                    }
+                ]
+            },
+            {
+                areaId: "humanas",
+                areaName: "Ciências Humanas e Suas Tecnologias",
+                areaIcon: "fa-landmark",
+                subjectId: "sociologia",
+                subjectName: "Sociologia Geral e do Brasil",
+                icon: "fa-users",
+                cards: [
+                    {
+                        id: "soc_1",
+                        topic: "Émile Durkheim",
+                        question: "O que são os Fatos Sociais e as formas de Solidariedade para Émile Durkheim?",
+                        explanation: "• **Fatos Sociais**: Maneiras de agir, pensar e sentir que são **Exteriores** ao indivíduo, **Coercitivos** (forçam conduta) e **Gerais** (coletivos).\n• **Solidariedade Mecânica**: Típica de sociedades pré-industriais, baseada no compartilhamento direto de tradições.\n• **Solidariedade Orgânica**: Típica da sociedade capitalista complexa, baseada na divisão do trabalho e na interdependência de funções.",
+                        strategy: "Diante de comportamentos padronizados pela sociedade (como a linguagem e as leis), identifique a coerção do Fato Social.",
+                        trap: "Achar que Durkheim focava na ação individual; para ele, a sociedade molda o indivíduo."
+                    },
+                    {
+                        id: "soc_2",
+                        topic: "Karl Marx",
+                        question: "Como funcionam os conceitos de Luta de Classes, Mais-Valia e Alienação em Marx?",
+                        explanation: "• **Luta de Classes**: O motor da história, o conflito entre Burguesia (detentora dos meios de produção) e Proletariado.\n• **Mais-Valia**: A parcela do valor do trabalho produzido pelo operário que é apropriada sem pagamento pelo capitalista.\n• **Alienação**: O trabalhador perde o controle sobre o processo produtivo e não se reconhece no produto que fabricou.",
+                        strategy: "No ENEM, a Mais-Valia explica a exploração e o acúmulo de capital na produção industrial.",
+                        trap: "Confundir Mais-Valia Absoluta (aumento da jornada de trabalho) com Mais-Valia Relativa (aumento da produtividade com tecnologia)."
+                    },
+                    {
+                        id: "soc_3",
+                        topic: "Max Weber",
+                        question: "O que é Ação Social e os Tipos Ideais de Dominação Legítima segundo Max Weber?",
+                        explanation: "• **Ação Social**: Conduta humana munida de sentido individual orientado pela ação dos outros.\n• **Dominação Tradicional**: Baseada no costume e no patriarcalismo.\n• **Dominação Carismática**: Baseada na devoção às qualidades pessoais do líder.\n• **Dominação Racional-Legal**: Baseada em leis escritas, estatutos e na burocracia estatal moderna.",
+                        strategy: "Weber utiliza 'Tipos Ideais' como modelos conceituais para analisar a realidade social sem julgamento moral.",
+                        trap: "Ao contrário de Durkheim, Weber parte do indivíduo (ação social) para entender a sociedade."
+                    },
+                    {
+                        id: "soc_4",
+                        topic: "Cultura e Alteridade",
+                        question: "Qual o contraste entre Etnocentrismo e Relativismo Cultural na análise social?",
+                        explanation: "• **Etnocentrismo**: Julgar a cultura do outro tomando a sua própria cultura como superior ou padrão único de civilização (gera preconceito e xenofobia).\n• **Relativismo Cultural**: Compreender cada manifestação cultural dentro de sua própria lógica, contexto histórico e valores internos.",
+                        strategy: "O ENEM defende enfaticamente o Relativismo Cultural e os Direitos Humanos universais contra posturas etnocêntricas.",
+                        trap: "Relativizar violações graves aos Direitos Humanos sob a falsa justificativa de 'tradição cultural indescritível'."
+                    },
+                    {
+                        id: "soc_5",
+                        topic: "Mundo do Trabalho",
+                        question: "Como evoluíram os modelos produtivos: Fordismo, Toyotismo e a 'Uberização' atual?",
+                        explanation: "• **Fordismo**: Produção em massa, esteira rolante, trabalho repetitivo, estoques lotados.\n• **Toyotismo**: Produção flexível (*Just-in-time*), trabalhador polivalente, eliminação de estoques.\n• **Uberização (Plataformização)**: Trabalho sob demanda gerido por algoritmos, sem vínculo empregatício formal, transferência dos custos do trabalho ao próprio trabalhador precarizado.",
+                        strategy: "Associe a Uberização ao aumento do trabalho informal e à perda de direitos trabalhistas históricos.",
+                        trap: "Confundir 'flexibilidade de horário' com autonomia real do trabalhador no modelo das plataformas digitais."
+                    },
+                    {
+                        id: "soc_6",
+                        topic: "Cidadania e Direitos Humanos",
+                        question: "Como T.H. Marshall divide a evolução histórica dos Direitos de Cidadania?",
+                        explanation: "1. **Direitos Civis** (Século XVIII): Liberdade individual, de expressão e de propriedade.\n2. **Direitos Políticos** (Século XIX): Direito de votar e ser votado (sufrágio universal).\n3. **Direitos Sociais** (Século XX): Educação, saúde, moradia, trabalho e previdência pública garantidos pelo Estado de Bem-Estar.",
+                        strategy: "No Brasil, autores apontam a conquista inversa: primeiro vieram os direitos sociais, depois os civis e políticos.",
+                        trap: "Acreditar que a conquista formal da cidadania na Constituição garante sua efetivação automática para todos os cidadãos."
+                    },
+                    {
+                        id: "soc_7",
+                        topic: "Estratificação e Mobilidade",
+                        question: "Qual a diferença entre Estratificação por Castas, Estamentos e Classes Sociais?",
+                        explanation: "• **Castas**: Mobilidade social nula, posição definida pelo nascimento e religião (ex: Índia tradicional).\n• **Estamentos**: Mobilidade muito reduzida, baseada em títulos e honra (ex: Sociedade Feudal).\n• **Classes Sociais**: Mobilidade possível teoricamente, baseada na dimensão socioeconômica e capital acumulado no capitalismo.",
+                        strategy: "Mobilidade Social pode ser **Vertical** (ascensão/descida de classe) ou **Horizontal** (mudança de função sem alterar o status social).",
+                        trap: "Superestimar a mobilidade de classe no capitalismo ignorando as barreiras da desigualdade de oportunidades e o capital cultural."
+                    },
+                    {
+                        id: "soc_8",
+                        topic: "Sociologia Brasileira",
+                        question: "O que abordam os clássicos Sérgio Buarque de Holanda, Gilberto Freyre e Darcy Ribeiro?",
+                        explanation: "• **Sérgio Buarque de Holanda** ('Raízes do Brasil'): O 'Homem Cordial' (que age pelo coração/emoção, confundindo a esfera privada com o interesse público -> patrimonialismo e nepotismo).\n• **Gilberto Freyre** ('Casa-Grande & Senzala'): Estuda a formação miscigada, mas idealizou a 'Democracia Racial'.\n• **Darcy Ribeiro** ('O Povo Brasileiro'): Analisa as matrizes (indígena, africana e europeia) e o processo de 'ninguendade' na construção do povo.",
+                        strategy: "O termo 'Homem Cordial' não significa ser educado, mas sim agir por paixões e laços pessoais afetivos em vez de normas impessoais.",
+                        trap: "Usar o termo 'Democracia Racial' como realidade incontestável; a sociologia crítica (como Florestan Fernandes) demonstrou o mito dessa igualdade."
+                    }
+                ]
+            },
+
+            // ==========================================
+            // 3. CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS
+            // ==========================================
+            {
+                areaId: "natureza",
+                areaName: "Ciências da Natureza e Suas Tecnologias",
+                areaIcon: "fa-atom",
+                subjectId: "biologia",
+                subjectName: "Biologia e Ecologia",
+                icon: "fa-dna",
+                cards: [
+                    {
+                        id: "bio_1",
+                        topic: "Ecologia - Dinâmica Trófica",
+                        question: "Qual a diferença entre Bioacumulação e Magnificação Trófica nas cadeias alimentares?",
+                        explanation: "• **Bioacumulação**: Acúmulo de substâncias não biodegradáveis (ex: metais pesados, pesticidas DDT) nos tecidos de **um único indivíduo** ao longo do tempo.\n• **Magnificação Trófica**: Concentração crescente do contaminante ao longo de **toda a cadeia alimentar**, atingindo o nível máximo nos **consumidores do topo**.",
+                        strategy: "Em questões sobre mercúrio em garimpos ou defensivos agrícolas, o topo da cadeia (predadores/humanos) sofre a maior contaminação.",
+                        trap: "Achar que os produtores (plantas) possuem a maior concentração do veneno na magnificação trófica; eles têm a **menor** concentração por indivíduo."
+                    },
+                    {
+                        id: "bio_2",
+                        topic: "Relações Ecológicas",
+                        question: "Como diferenciar Mutualismo, Protocooperação, Parasitismo e Inquilinito?",
+                        explanation: "• **Mutualismo (+/+)**: Associação obrigatória para a sobrevivência de ambos (ex: Líquens, micorrizas).\n• **Protocooperação (+/+)**: Associação benéfica, mas não obrigatória (ex: Anêmona e Peixe-palhaço).\n• **Parasitismo (+/-)**: Um se beneficia prejudicando o hospedeiro (ex: Tênia, Carrapato).\n• **Inquilinito (+/0)**: Um busca abrigo no outro sem causar dano (ex: Orquídeas em árvores).",
+                        strategy: "Se a separação dos indivíduos levar à morte de um deles, a relação é Mutualismo obrigatório.",
+                        trap: "Confundir Epifitismo/Inquilinito (que não retira seiva) com Parasitismo vegetal (como o Erva-de-passarinho, que sugere seiva)."
+                    },
+                    {
+                        id: "bio_3",
+                        topic: "Citologia e Organelas",
+                        question: "Quais são as funções centrais da Mitocôndria, Complexo de Golgi, Lisossomos e Peroxissomos?",
+                        explanation: "• **Mitocôndria**: Respiração celular e síntese de ATP (energia).\n• **Complexo de Golgi**: Empacotamento, secreção celular e formação do acrossomo do espermatozoide.\n• **Lisossomo**: Digestão intracelular e autofagia.\n• **Peroxissomo**: Desintoxicação celular (degradação do peróxido de hidrogênio pela enzima catalase).",
+                        strategy: "Células do fígado possuem peroxissomos e retículo endoplasmático liso hiperdesenvolvidos para neutralizar álcool e drogas.",
+                        trap: "Confundir a função do Retículo Endoplasmático Rugoso (síntese de proteínas) com o Liso (síntese de lipídios e desintoxicação)."
+                    },
+                    {
+                        id: "bio_4",
+                        topic: "Genética e Heredogramas",
+                        question: "Como identificar se uma herança em heredograma é Autossômica Dominante, Recessiva ou Ligada ao Sexo?",
+                        explanation: "• **Recessiva**: Pais normais (iguais) geram filho afetado (diferente) -> Os pais são obrigatoriamente heterozigotos (Aa).\n• **Ligada ao X Recessiva**: Afeta predominantemente homens; mães afetadas transmitem obrigatoriamente para todos os filhos homens (ex: Hemofilia, Daltonismo).",
+                        strategy: "Busque no heredograma o padrão: **Pais iguais com filho diferente**. O filho carrega a condição recessiva (aa).",
+                        trap: "Assumir que uma característica dominante é sempre a mais frequente na população geral."
+                    },
+                    {
+                        id: "bio_5",
+                        topic: "Imunologia - Vacina vs Soro",
+                        question: "Qual a diferença biológica crucial entre Vacina e Soro Terapêutico?",
+                        explanation: "• **Vacina**: Imunização **Ativa e Preventiva**. Contém antígenos atenuados/mortos. Estimula o corpo a produzir seus próprios anticorpos e **células de memória** imunitária.\n• **Soro**: Imunização **Passiva e Curativa**. Contém anticorpos prontos injetados para neutralizar toxinas de imediato (ex: picada de cobra, escorpião). Não gera memória.",
+                        strategy: "Em casos de emergência com venenos ou toxinas letais, a única resposta rápida eficaz é o **Soro**.",
+                        trap: "Achar que soro produz memória imunológica preventiva para contaminações futuras."
+                    },
+                    {
+                        id: "bio_6",
+                        topic: "Evolução Biológica",
+                        question: "Como o Neodarwinismo (Teoria Sintética da Evolução) explica a seleção natural?",
+                        explanation: "A seleção natural atua sobre a variabilidade genética pré-existente na população. Essa variabilidade é gerada por **Mutações** (aleatórias) e **Recombinação Gênica** (Meiose/Crossing-over). O meio ambiente **seleciona** os indivíduos mais aptos com características adaptativas vantajosas.",
+                        strategy: "O meio ambiente **NÃO provoca a mutação para adaptar o ser**; o meio apenas **seleciona** as mutações que já ocorreram.",
+                        trap: "Cair no erro Lamarckista: achar que o uso e desuso cria órgãos ou que o ambiente força a transformação intencional do organismo."
+                    },
+                    {
+                        id: "bio_7",
+                        topic: "Fisiologia Humana - Endocrinologia",
+                        question: "Como o Glucagon e a Insulina regulam a glicemia no sangue?",
+                        explanation: "• **Insulina** (produzida no pâncreas): Hormônio **hipoglicemiante**. Promove a entrada de glicose nas células e o armazenamento de glicogênio no fígado após as refeições.\n• **Glucagon**: Hormônio **hiperglicemiante**. Estimula a quebra do glicogênio hepático em glicose nos períodos de jejum.",
+                        strategy: "No Diabetes Mellitus Tipo 1, há destruição das células beta do pâncreas, impedindo a produção de insulina.",
+                        trap: "Confundir Glicose (monossacarídeo no sangue) com Glicogênio (polissacarídeo de reserva de energia no fígado/músculos)."
+                    },
+                    {
+                        id: "bio_8",
+                        topic: "Botânica - Hormônios Vegetais",
+                        question: "Qual o papel das Auxinas no Fototropismo e do Etileno na maturação de frutos?",
+                        explanation: "• **Auxinas**: Hormônio do crescimento celular vegetal. Sofre degradação pela luz, acumulando-se no lado sombreado do caule e promovendo o seu alongamento em direção à luz (**Fototropismo positivo**).\n• **Etileno**: Hormônio gasoso que acelera a maturação dos frutos e a queda das folhas (abscisão).",
+                        strategy: "Embalar frutas verdes em jornal ou saquinho acelera a maturação por aprisionar o gás etileno liberado.",
+                        trap: "Achar que as auxinas se acumulam no lado iluminado da planta; elas migram para a área de sombra."
+                    }
+                ]
+            },
+            {
+                areaId: "natureza",
+                areaName: "Ciências da Natureza e Suas Tecnologias",
+                areaIcon: "fa-atom",
+                subjectId: "quimica",
+                subjectName: "Química Geral, Orgânica e Ambiental",
+                icon: "fa-flask",
+                cards: [
+                    {
+                        id: "qui_1",
+                        topic: "Estequiometria",
+                        question: "Qual o passo a passo infalível para resolver cálculos estequiométricos com pureza e rendimento?",
+                        explanation: "1. Escreva e **balanceie a equação química**.\n2. Relacione as massas molares ou volumes gasosos das substâncias envolvidas.\n3. Aplique a porcentagem de **Pureza** nos reagentes *antes* do cálculo.\n4. Aplique a porcentagem de **Rendimento** no produto final *depois* do cálculo.",
+                        strategy: "Lembre-se do Volume Molar dos gases na CNTP: **22,4 L/mol**.",
+                        trap: "Aplicar o rendimento antes da reaçao ou esquecer de balancear os coeficientes estequiométricos no início!"
+                    },
+                    {
+                        id: "qui_2",
+                        topic: "Soluções e Concentração",
+                        question: "Como calcular Concentração Comum, Molaridade e entender processos de Diluição?",
+                        explanation: "• **Concentração Comum (C)**: $C = \\frac{m}{V}$ (massa de soluto por volume de solução em g/L).\n• **Molaridade (M)**: $M = \\frac{n}{V} = \\frac{m}{MM \\cdot V}$ (moles por litro).\n• **Diluição**: $C_1 \\cdot V_1 = C_2 \\cdot V_2$ (adicionar solvente aumenta o volume e diminui a concentração, mantendo a massa do soluto constante).",
+                        strategy: "Na diluição, dobrar o volume da solução reduz a concentração pela metade.",
+                        trap: "Confundir massa de soluto com massa total da solução ou esquecer de converter mililitros (mL) para Litros (L)."
+                    },
+                    {
+                        id: "qui_3",
+                        topic: "Termoquímica",
+                        question: "Como calcular a Variação de Entalpia (ΔH) através da Lei de Hess e Energia de Ligação?",
+                        explanation: "• **Reação Exotérmica**: Libera calor ($ΔH < 0$).\n• **Reação Endotérmica**: Absorve calor ($ΔH > 0$).\n• **Lei de Hess**: O $ΔH$ depende apenas dos estados inicial e final, somando-se as equações intermediárias.\n• **Energia de Ligação**: $ΔH = \\sum \\text{Energias Rompidas (Reagentes - Endotérmico)} - \\sum \\text{Energias Formadas (Produtos - Exotérmico)}$.",
+                        strategy: "Ao inverter uma equação termoquímica na Lei de Hess, inverte-se o sinal do seu $ΔH$.",
+                        trap: "Trocar os sinais ao calcular a energia de ligação: Romper ligações **absorve** energia (+); formar ligações **libera** energia (-)."
+                    },
+                    {
+                        id: "qui_4",
+                        topic: "Eletroquímica - Pilhas e Eletrólise",
+                        question: "Qual o macete 'CRAO' e como funciona a Proteção Catódica contra a corrosão?",
+                        explanation: "• Macete **CRAO**: **C**átodo = **R**edução (ganha e- / polo + na pilha); **A**nodo = **O**xidação (perde e- / polo - na pilha).\n• **Proteção Catódica (Metal de Sacrifício)**: Conecta-se o ferro a um metal com menor potencial de redução (maior potencial de oxidação, ex: Zinco ou Magnésio) que oxida no lugar do ferro.",
+                        strategy: "Para o metal atuar como metal de sacrifício, seu potencial de oxidação deve ser **maior** do que o do metal protegido.",
+                        trap: "Achar que os elétrons fluem do cátodo para o anodo. Os elétrons SEMPRE fluem do **Anodo para o Cátodo**."
+                    },
+                    {
+                        id: "qui_5",
+                        topic: "Química Orgânica - Funções e Polaridade",
+                        question: "Como identificar Álcool, Fenol, Ácido Carboxílico e Estér, e entender suas solubilidades?",
+                        explanation: "• **Álcool**: -OH ligado a carbono saturado ($sp^3$).\n• **Fenol**: -OH ligado diretamente ao anel aromático.\n• **Ácido Carboxílico**: -COOH (carboxila).\n• **Éster**: -COO-R (produzido por Esterificação: Ácido Carboxílico + Álcool -> Éster + Água).\n• Polaridade: A presença de -OH permite realizar **ligações de hidrogênio** (solúvel em água). Cadeias carbônicas longas apolares reduzem a solubilidade em água.",
+                        strategy: "Biocombustíveis como o Biodiesel são ésteres obtidos pela reação de transesterificação de óleos vegetais com álcool.",
+                        trap: "Confundir Fenol (hidroxila no anel aromático) com Álcool Aromático (hidroxila em carbono fora do anel)."
+                    },
+                    {
+                        id: "qui_6",
+                        topic: "Cinética Química",
+                        question: "Quais fatores alteram a Velocidade de uma reação e como atuam os Catalisadores?",
+                        explanation: "A velocidade aumenta com: maior concentração de reagentes, maior superfície de contato, maior temperatura e presença de **Catalisador**.\n• **Catalisador**: Acelera a reação ao **diminuir a Energia de Ativação ($E_a$)**, oferecendo um caminho reacional alternativo sem ser consumido.",
+                        strategy: "O catalisador aumenta a velocidade das reações direta e inversa, mas **NÃO altera o rendimento nem o $ΔH$ final**.",
+                        trap: "Acreditar que o catalisador altera o equilíbrio químico ou aumenta o $ΔH$ final da reação."
+                    },
+                    {
+                        id: "qui_7",
+                        topic: "Equilíbrio Químico e Le Chatelier",
+                        question: "Como o Princípio de Le Chatelier reage a alterações de Temperatura, Pressão e Concentração?",
+                        explanation: "O sistema desloca o equilíbrio para anular a perturbação:\n• **Adicionar substância**: Desloca para o lado oposto.\n• **Aumentar Pressão**: Desloca para o lado com menor volume gasoso.\n• **Aumentar Temperatura**: Desloca no sentido da reação **Endotérmica**.",
+                        strategy: "Adicionar reagente favorece a formação dos produtos (desloca para a direita).",
+                        trap: "Achar que a adição de um catalisador desloca o equilíbrio químico. O catalisador apenas atinge o equilíbrio mais rápido!"
+                    },
+                    {
+                        id: "qui_8",
+                        topic: "Química Ambiental",
+                        question: "Quais são as causas químicas da Chuva Ácida e da Destruição da Camada de Ozônio?",
+                        explanation: "• **Chuva Ácida**: Queima de combustíveis fósseis libera óxidos de enxofre ($SO_2, SO_3$) e nitrogênio ($NO_x$), que reagem com a água formando ácidos fortes ($H_2SO_4, HNO_3$).\n• **Camada de Ozônio ($O_3$)**: Destruída pelos CFCs (clorofluorcarbonetos). A radiação UV quebra o CFC liberando radicais livres de Cloro ($Cl^\\bullet$) que atuam como catalisadores da destruição do ozônio.",
+                        strategy: "A Acidificação dos oceanos por absorção excessiva de $CO_2$ reduz os íons carbonato impossibilitando a formação de conchas de corais.",
+                        trap: "Confundir $CO_2$ (causador do efeito estufa) como principal responsável direto pela chuva ácida."
+                    }
+                ]
+            },
+            {
+                areaId: "natureza",
+                areaName: "Ciências da Natureza e Suas Tecnologias",
+                areaIcon: "fa-atom",
+                subjectId: "fisica",
+                subjectName: "Física e Fenômenos Naturais",
+                icon: "fa-bolt",
+                cards: [
+                    {
+                        id: "fis_1",
+                        topic: "Cinematica e Gráficos",
+                        question: "Como interpretar a área sob o gráfico Velocidade vs Tempo e a inclinação da curva?",
+                        explanation: "• No gráfico $v \\times t$: A **Área** sob a curva é numericamente igual ao **Deslocamento ($Δs$)**.\n• A inclinação (tangente) do gráfico $v \\times t$ representa a **Aceleração ($a$)**.\n• No gráfico $s \\times t$: A inclinação representa a **Velocidade ($v$)**.",
+                        strategy: "Para calcular a distância percorrida em um gráfico $v \\times t$, divida a figura em áreas geométricas conhecidas (triângulos e retângulos).",
+                        trap: "Confundir velocidade média com a média aritmética simples das velocidades se os tempos forem diferentes."
+                    },
+                    {
+                        id: "fis_2",
+                        topic: "Leis de Newton e Dinâmica",
+                        question: "O que diz a 3ª Lei de Newton e qual a pegadinha clássica sobre as forças de Ação e Reação?",
+                        explanation: "Para toda força de Ação existe uma força de Reação de mesmo módulo, mesma direção e sentidos opostos.\n**Atenção**: As forças de ação e reação atuam em **CORPOS DIFERENTES** e, por isso, **NUNCA se anulam mutuamente**!",
+                        strategy: "A força Peso (atração da Terra no corpo) e a Normal (reação da superfície no corpo) NÃO formam um par de Ação e Reação.",
+                        trap: "Marcar que a força Normal é reação à força Peso em um bloco parado sobre uma mesa."
+                    },
+                    {
+                        id: "fis_3",
+                        topic: "Energia e Conservação",
+                        question: "Como aplicar o Princípio de Conservação da Energia Mecânica em sistemas conservativos?",
+                        explanation: "Na ausência de atrito ou resistência do ar: $E_{mec} = E_k + E_p = \\text{Constante}$.\n• Energia Cinética: $E_k = \\frac{m \\cdot v^2}{2}$\n• Energia Potencial Gravitacional: $E_p = m \\cdot g \\cdot h$\n• Potência Útil: $P = \\frac{W}{Δt} = F \\cdot v$.",
+                        strategy: "No topo de uma montanha russa, toda a energia é potencial ($mgh$); na base, toda energia virou cinética ($\\frac{mv^2}{2}$).",
+                        trap: "Esqüecer que na presenca de atrito parte da energia mecânica é transformada irrecuperavelmente em calor (Energia Térmica)."
+                    },
+                    {
+                        id: "fis_4",
+                        topic: "Circuitos Elétricos",
+                        question: "Como se comportam a Corrente, Tensão e Resistência em associação em Série vs Paralelo?",
+                        explanation: "• **Série**: A corrente ($I$) é a mesma em todos os resistores. $R_{eq} = R_1 + R_2$. A tensão se divide.\n• **Paralelo**: A tensão ($U$) é a mesma para todos os ramos. $I_{total} = I_1 + I_2$. $\\frac{1}{R_{eq}} = \\frac{1}{R_1} + \\frac{1}{R_2}$. Se um aparelho queima, os outros continuam funcionando.",
+                        strategy: "A rede elétrica residencial é montada em **Paralelo** para garantir 127V/220V independentes em todas as tomadas.",
+                        trap: "Achar que adicionar mais resistores em paralelo aumenta a resistência equivalente; na verdade, a $R_{eq}$ **diminui**."
+                    },
+                    {
+                        id: "fis_5",
+                        topic: "Ondulatória",
+                        question: "Como aplicar a Equação Fundamental da Onda e entender Interferência e Efeito Doppler?",
+                        explanation: "• **Equação Fundamental**: $v = λ \\cdot f$ (Velocidade = Comprimento de Onda $\\times$ Frequência).\n• A **Frequência ($f$)** depende apenas da fonte emissora e **não muda ao mudar de meio**.\n• **Efeito Doppler**: Aceleração ou aproximação relativa faz a frequência percebida parecer mais **aguda** (maior $f$), e o afastamento mais **grave** (menor $f$).",
+                        strategy: "Na refração de uma onda de luz ou som, quando a velocidade muda, o comprimento de onda ($λ$) muda proporcionalmente, mas a frequência ($f$) fica constante.",
+                        trap: "Acreditar que a frequência da onda muda quando ela passa do ar para a água."
+                    },
+                    {
+                        id: "fis_6",
+                        topic: "Termologia e Trocas de Calor",
+                        question: "Qual a diferença entre Calor Sensível ($Q = m \\cdot c \\cdot ΔT$) e Calor Latente ($Q = m \\cdot L$)?",
+                        explanation: "• **Calor Sensível**: Promove a variação de temperatura do corpo **sem mudar seu estado físico**.\n• **Calor Latente**: Promove a mudança de estado físico (fusão, vaporização) **mantendo a temperatura rigorosamente constante** durante o processo.",
+                        strategy: "Substâncias com elevado calor específico (como a água, $c = 1\\text{ cal/g}^\\circ\\text{C}$) demoram a esquentar e a esfriar, atuando como excelentes reguladores térmicos.",
+                        trap: "Usar a fórmula do calor sensível durante uma transição de fase (onde o $ΔT = 0$)."
+                    },
+                    {
+                        id: "fis_7",
+                        topic: "Óptica Geométrica",
+                        question: "Quais são as lentes corretivas para Miopia e Hipermetropia e qual o efeito da Refração?",
+                        explanation: "• **Miopia**: O olho é mais longo e a imagem se forma **antes** da retina. Correção: **Lentes Divergentes**.\n• **Hipermetropia**: O olho é mais curto e a imagem se forma **atrás** da retina. Correção: **Lentes Convergentes**.\n• Refração: Desvio do feixe de luz ao mudar de meio devido à alteração de velocidade de propagação (Lei de Snell-Descartes).",
+                        strategy: "Lentes divergentes sempre produzem imagens virtuais, diretas e menores.",
+                        trap: "Confundir espelhos (que refletem a luz) com lentes (que refratam e transmitem a luz)."
+                    },
+                    {
+                        id: "fis_8",
+                        topic: "Eletromagnetismo",
+                        question: "Como a Lei de Indução de Faraday explica o funcionamento de Usinas e Geradores?",
+                        explanation: "A variação do fluxo magnético através de uma espira ou bobina condutora induz o aparecimento de uma **Corrente Elétrica Induzida**. É assim que usinas hidrelétricas, eólicas e termoelétricas transformam energia mecânica de rotação de turbinas em energia elétrica.",
+                        strategy: "Sem **variação** temporal do campo magnético, não há geração de corrente elétrica induzida.",
+                        trap: "Achar que um campo magnético constante e parado gera corrente elétrica em um circuito fixo."
+                    }
+                ]
+            },
+
+            // ==========================================
+            // 4. MATEMÁTICA E SUAS TECNOLOGIAS
+            // ==========================================
+            {
+                areaId: "matematica",
+                areaName: "Matemática e Suas Tecnologias",
+                areaIcon: "fa-calculator",
+                subjectId: "mat_basica",
+                subjectName: "Matemática Básica e Razões",
+                icon: "fa-shapes",
+                cards: [
+                    {
+                        id: "mb_1",
+                        topic: "Razão, Proporção e Regra de Três",
+                        question: "Como identificar Grandezas Direta versus Inversamente Proporcionais na Regra de Três?",
+                        explanation: "• **Diretamente Proporcionais**: Se uma grandeza aumenta, a outra aumenta na mesma proporção (ex: Quantidade de combustível e Custo total). Multiplica-se em cruz ($X$).\n• **Inversamente Proporcionais**: Se uma aumenta, a outra diminui na mesma proporção (ex: Velocidade média e Tempo de viagem; Número de operários e Dias de obra). Multiplica-se em linha ($=$).",
+                        strategy: "Antes de montar as contas, pergunte a si mesmo: 'Se eu dobrar esta variável, a outra vai dobrar ou cair pela metade?'",
+                        trap: "Montar a regra de três simples multiplicando em cruz sem testar se as grandezas são inversas."
+                    },
+                    {
+                        id: "mb_2",
+                        topic: "Escalas Cartográficas",
+                        question: "Como calcular distâncias reais a partir da Escala e atenção ao cálculo de Áreas?",
+                        explanation: "Escala $E = \\frac{\\text{Distância no Mapa (d)}}{\\text{Distância Real (D)}}$. Exemplo: Escala 1:50.000 significa que $1\\text{ cm}$ no mapa representa $50.000\\text{ cm}$ ($500\\text{ m}$) na realidade.\n**CUIDADO COM ÁREAS**: Para razão de áreas, eleve a escala ao quadrado: $E^2 = \\frac{\\text{Área no Mapa}}{\\text{Área Real}}$.",
+                        strategy: "Converta sempre as unidades para a mesma grandeza antes de fazer a divisão ($1\\text{ m} = 100\\text{ cm}$, $1\\text{ km} = 100.000\\text{ cm}$).",
+                        trap: "Aplicar a escala linear direta ao calcular áreas ou volumes sem elevar ao quadrado ou cubo."
+                    },
+                    {
+                        id: "mb_3",
+                        topic: "Porcentagem e Aumentos",
+                        question: "Como aplicar os Fatores de Multiplicação para Aumentos e Descontos sucessivos?",
+                        explanation: "• **Aumento de $x\\%$**: Multiplique o valor por $(1 + \\frac{x}{100})$. Ex: Aumento de $20\\% \\rightarrow \\times 1,20$.\n• **Desconto de $x\\%$**: Multiplique por $(1 - \\frac{x}{100})$. Ex: Desconto de $15\\% \\rightarrow \\times 0,85$.\n• **Aumentos Sucessivos**: Dois aumentos de $10\\%$ equivalem a $1,10 \\times 1,10 = 1,21$ (Aumento real de $21\\%$, e não $20\\%$!).",
+                        strategy: "Para descontos sucessivos, multiplique os fatores de redução em sequência.",
+                        trap: "Somar porcentagens em aumentos ou descontos sucessivos (ex: achar que dois aumentos de $50\\%$ dão $100\\%$; dão $125\\%$)!"
+                    },
+                    {
+                        id: "mb_4",
+                        topic: "Unidades de Medida",
+                        question: "Como fazer conversões de volume entre $m^3$, $dm^3$, $cm^3$ e Litros sem errar?",
+                        explanation: "A relação de equivalência de ouro para o ENEM é:\n• $1\\text{ dm}^3 = 1\\text{ Litro}$\n• $1\\text{ m}^3 = 1.000\\text{ Litros}$\n• $1\\text{ cm}^3 = 1\\text{ mL}$.",
+                        strategy: "Memorize: $1\\text{ m}^3$ de água equivale a uma caixa d'água de $1.000\\text{ Litros}$.",
+                        trap: "Achar que $1\\text{ m}^3$ é igual a $100\\text{ Litros}$. Lembrar que em unidades cúbicas a conversão varia de $1000$ em $1000$!"
+                    },
+                    {
+                        id: "mb_5",
+                        topic: "Estatística Básica",
+                        question: "Qual a diferença entre Média Aritmética, Média Ponderada, Moda e Mediana?",
+                        explanation: "• **Média Ponderada**: Soma dos valores multiplicados pelos seus pesos dividida pela soma dos pesos.\n• **Moda**: O valor que mais se repete no conjunto de dados.\n• **Mediana**: O valor central do conjunto **APÓS organizar os dados em ordem crescente/decrescente (Rol)**. Se o número de termos for par, faz-se a média dos dois centrais.",
+                        strategy: "Antes de calcular a Mediana, ordene obrigatoriamente os números em rol crescente!",
+                        trap: "Pegar o número do meio de uma lista desordenada para achar a mediana sem colocar em rol."
+                    },
+                    {
+                        id: "mb_6",
+                        topic: "Juros Simples vs Compostos",
+                        question: "Quais as fórmulas de Juros Simples e Compostos e o comportamento de seus gráficos?",
+                        explanation: "• **Juros Simples**: $J = C \\cdot i \\cdot t$ (Gráfico é uma **Reta** - crescimento linear).\n• **Juros Compostos**: $M = C \\cdot (1 + i)^t$ (Gráfico é uma **Curva Exponencial** - juros sobre juros).",
+                        strategy: "Em prazos longos, os juros compostos superam drasticamente os juros simples devido ao crescimento exponencial.",
+                        trap: "Usar taxa em porcentagem sem dividir por 100 na fórmula ($i = 5\\% = 0,05$)."
+                    },
+                    {
+                        id: "mb_7",
+                        topic: "MMC e MDC Práticos",
+                        question: "Como identificar se um problema exige Mínimo Múltiplo Comum (MMC) ou Máximo Divisor Comum (MDC)?",
+                        explanation: "• **MMC**: Envolve ideia de **coincidência de tempos, encontros periódicos ou ciclos futuros** (ex: 'De quantos em quantos dias os três remédios serão tomados juntos novamente?').\n• **MDC**: Envolve ideia de **divisão em partes iguais com o maior tamanho possível sem sobras** (ex: 'Cortar fitas de tamanhos diferentes no maior comprimento possível').",
+                        strategy: "Palavras-chave: 'Encontro/Juntos no futuro' -> MMC. 'Dividir no maior tamanho possível' -> MDC.",
+                        trap: "Confundir as decomposições em fatores primos do MMC e do MDC."
+                    },
+                    {
+                        id: "mb_8",
+                        topic: "Leitura de Gráficos",
+                        question: "Quais pegadinhas de eixos e proporções ocorrem em gráficos no ENEM?",
+                        explanation: "Fique atento a gráficos com eixos truncados (que não começam no zero para exaggerar variações), escalas não lineares e gráficos de setores (pizzas) onde a soma das porcentagens deve dar $100\\%$.",
+                        strategy: "Leia sempre o título, a legenda e as unidades marcadas nos eixos $X$ e $Y$ antes de responder.",
+                        trap: "Assumir conclusões sem conferir os valores numéricos impressos nas barras ou pontos do gráfico."
+                    }
+                ]
+            },
+            {
+                areaId: "matematica",
+                areaName: "Matemática e Suas Tecnologias",
+                areaIcon: "fa-calculator",
+                subjectId: "geometria",
+                subjectName: "Geometria (Plana, Espacial e Analítica)",
+                icon: "fa-draw-polygon",
+                cards: [
+                    {
+                        id: "geo_p1",
+                        topic: "Áreas de Figuras Planas",
+                        question: "Quais são as fórmulas fundamentais das áreas do Triângulo, Círculo e Trapézio?",
+                        explanation: "• **Triângulo qualquer**: $A = \\frac{b \\cdot h}{2}$\n• **Triângulo Equilátero**: $A = \\frac{L^2 \\sqrt{3}}{4}$\n• **Círculo**: $A = \\pi \\cdot r^2$ e Perímetro $C = 2 \\pi r$\n• **Trapézio**: $A = \\frac{(B + b) \\cdot h}{2}$.",
+                        strategy: "Para calcular áreas irregulares, decomponha a figura complexa em triângulos e retângulos simples.",
+                        trap: "Confundir o perímetro do círculo ($2 \\pi r$) com a área do círculo ($\pi r^2$)."
+                    },
+                    {
+                        id: "geo_p2",
+                        topic: "Teorema de Pitágoras e Semelhança",
+                        question: "Como utilizar os Triângulos Pitagóricos e o Critério de Semelhança AA?",
+                        explanation: "• **Pitágoras**: $a^2 = b^2 + c^2$. Triângulo retângulo base: **3 - 4 - 5** e seus múltiplos (6-8-10, 9-12-15) e **5 - 12 - 13**.\n• **Semelhança**: Se dois triângulos possuem dois ângulos congruentes (AA), os lados opostos a esses ângulos são proporcionais: $\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = k$.",
+                        strategy: "A razão entre as **áreas** de dois triângulos semelhantes é igual à razão de semelhança ao quadrado ($k^2$).",
+                        trap: "Aplicar o Teorema de Pitágoras em triângulos que não possuem ângulo reto ($90^\\circ$)."
+                    },
+                    {
+                        id: "geo_p3",
+                        topic: "Prismas e Cilindros",
+                        question: "Como calcular o Volume e a Área Lateral de Prismas e Cilindros?",
+                        explanation: "• **Prisma**: Volume $V = A_{base} \\cdot h$.\n• **Cilindro**: Volume $V = \\pi \\cdot r^2 \\cdot h$. Área Lateral $A_L = 2 \\pi r \\cdot h$.\n• **Capacidade**: $1\\text{ m}^3 = 1.000\\text{ Litros}$.",
+                        strategy: "Em embalagens cilíndricas, a área lateral planificada é um retângulo de lados $2 \\pi r$ e $h$.",
+                        trap: "Ao calcular a área total do cilindro, esquecer de somar as duas bases ($\pi r^2 + \pi r^2 = 2\pi r^2$)."
+                    },
+                    {
+                        id: "geo_p4",
+                        topic: "Pirâmides, Cones e Esferas",
+                        question: "Por que os volumes de Pirâmides e Cones usam o fator $\\frac{1}{3}$ e qual o volume da Esfera?",
+                        explanation: "• **Pirâmide**: $V = \\frac{1}{3} \\cdot A_{base} \\cdot h$\n• **Cone**: $V = \\frac{1}{3} \\cdot \\pi \\cdot r^2 \\cdot h$\n• **Esfera**: $V = \\frac{4}{3} \\cdot \\pi \\cdot r^3$ e Área da superfície $A = 4 \\pi r^2$.",
+                        strategy: "Um cone ou pirâmide possui $1/3$ do volume do cilindro ou prisma de mesma base e mesma altura.",
+                        trap: "Esquecer de dividir por 3 nos cálculos de volume de cones e pirâmides!"
+                    },
+                    {
+                        id: "geo_p5",
+                        topic: "Trigonometria Básica",
+                        question: "Quais as definições de Seno, Cosseno e Tangente e a Relação Fundamental?",
+                        explanation: "• $\\text{Seno} = \\frac{\\text{Cateto Oposto}}{\\text{Hipotenuza}}$\n• $\\text{Cosseno} = \\frac{\\text{Cateto Adjacente}}{\\text{Hipotenuza}}$\n• $\\text{Tangente} = \\frac{\\text{Cateto Oposto}}{\\text{Cateto Adjacente}}$\n• **Relação Fundamental**: $\\sin^2(x) + \\cos^2(x) = 1$.",
+                        strategy: "Valores clássicos: $\\sin(30^\\circ) = 1/2$, $\\cos(60^\\circ) = 1/2$, $\\sin(45^\\circ) = \\cos(45^\\circ) = \\sqrt{2}/2$.",
+                        trap: "Trocar o cateto oposto pelo adjacente ao aplicar a tangente na sombra de um prédio ou poste."
+                    },
+                    {
+                        id: "geo_p6",
+                        topic: "Geometria Analítica - Ponto",
+                        question: "Como calcular a Distância entre dois pontos e as Coordenadas do Ponto Médio?",
+                        explanation: "• **Distância**: $d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$ (Aplicação direta de Pitágoras no plano cartesiano).\n• **Ponto Médio**: $M = \\left(\\frac{x_1 + x_2}{2}, \\frac{y_1 + y_2}{2}\\right)$.",
+                        strategy: "Visualize o triângulo retângulo formado pelas variações $Δx$ e $Δy$ no plano cartesiano.",
+                        trap: "Trocar os sinais das coordenadas ao fazer as subtrações na fórmula da distância."
+                    },
+                    {
+                        id: "geo_p7",
+                        topic: "Equação da Reta",
+                        question: "Como determinar a Equação Reduzida da Reta e a condição de Perpendicularismo?",
+                        explanation: "• **Equação Reduzida**: $y = m \\cdot x + n$, onde $m$ é o Coeficiente Angular (inclinação $m = \\tan \\theta$) e $n$ é o Coeficiente Linear (onde corta o eixo $Y$).\n• **Retas Paralelas**: $m_1 = m_2$.\n• **Retas Perpendiculares**: $m_1 \\cdot m_2 = -1$ ($m_2 = -\\frac{1}{m_1}$).",
+                        strategy: "Se duas retas se cruzam formando $90^\\circ$, o coeficiente angular de uma é o oposto do inverso da outra.",
+                        trap: "Achar que retas perpendiculares possuem coeficientes angulares iguais."
+                    },
+                    {
+                        id: "geo_p8",
+                        topic: "Projeção Ortogonal e Vistas",
+                        question: "Como resolver questões sobre Projeções Ortogonais de objetos 3D no plano 2D?",
+                        explanation: "A projeção ortogonal é a 'sombra' lançada perpendicularmente pelos pontos do objeto sobre um plano horizontal ou vertical. Exemplo: A projeção ortogonal de uma hélice em movimento no chão é um segmento de reta ou círculo dependendo da iluminação.",
+                        strategy: "Imagine um facho de luz vindo exatamente do topo (ou da frente) do objeto caindo sobre o chão.",
+                        trap: "Confundir a vista superior de uma figura com a sua vista frontal ou perspectiva tridimensional."
+                    }
+                ]
+            },
+            {
+                areaId: "matematica",
+                areaName: "Matemática e Suas Tecnologias",
+                areaIcon: "fa-calculator",
+                subjectId: "algebra_funcoes",
+                subjectName: "Álgebra e Funções",
+                icon: "fa-chart-line",
+                cards: [
+                    {
+                        id: "alg_1",
+                        topic: "Função Afim (1º Grau)",
+                        question: "Como interpretar os coeficientes $a$ e $b$ na Função do 1º Grau $f(x) = a x + b$?",
+                        explanation: "• $a$ (**Coeficiente Angular / Taxa de Variação**): Define a inclinação da reta. Se $a > 0$ (Crescente), se $a < 0$ (Decrescente). Representa o custo unitário por item.\n• $b$ (**Coeficiente Linear / Valor Inicial**): É a ordenada onde a reta intercepta o eixo $Y$ ($x=0$). Representa a taxa fixa ou valor de partida.",
+                        strategy: "Em táxis ou contas de luz: $f(x) = \\text{Valor por km} \\cdot x + \\text{Bandeirada fixa}$.",
+                        trap: "Confundir o zero da função ($f(x)=0 \\rightarrow x = -b/a$) com o ponto onde o gráfico corta o eixo $Y$ ($b$)."
+                    },
+                    {
+                        id: "alg_2",
+                        topic: "Função Quadrática (2º Grau)",
+                        question: "Como encontrar o Vértice da Parábola e determinar Pontos de Máximo ou Mínimo?",
+                        explanation: "• Equação: $f(x) = a x^2 + b x + c$.\n• Coordenadas do Vértice $V = (x_v, y_v)$:\n  $x_v = -\\frac{b}{2a}$ (o valor de $x$ que maximiza/minimiza)\n  $y_v = -\\frac{\\Delta}{4a}$ (o valor **máximo ou mínimo** atingido pela função, onde $\\Delta = b^2 - 4ac$).\n• Se $a > 0$: Parábola com concavidade para cima (ponto de **Mínimo**).\n• Se $a < 0$: Parábola com concavidade para baixo (ponto de **Máximo**).",
+                        strategy: "Se a questão perguntar 'Qual a altura máxima?', calcule $y_v$. Se perguntar 'Em qual instante atinge a altura máxima?', calcule $x_v$.",
+                        trap: "Calcular $x_v$ quando o enunciado solicita o valor máximo ($y_v$)."
+                    },
+                    {
+                        id: "alg_3",
+                        topic: "Função Exponencial",
+                        question: "Como identificar problemas de Crescimento e Decaimento Exponencial?",
+                        explanation: "• Função base: $f(x) = a \\cdot b^x$.\n• Se $b > 1$: **Crescimento Exponencial** (ex: proliferação de bactérias, juros compostos).\n• Se $0 < b < 1$: **Decaimento Exponencial** (ex: desvalorização de bens, meia-vida radioativa).",
+                        strategy: "A variável independente $x$ no expoente indica que o valor dobra, triplica ou cai pela metade a cada intervalo fixo de tempo.",
+                        trap: "Confundir Função Exponencial ($2^x$) com Função Potência ($x^2$). O crescimento exponencial é incomparavelmente mais rápido."
+                    },
+                    {
+                        id: "alg_4",
+                        topic: "Logaritmos",
+                        question: "Quais são as propriedades operatórias fundamentais dos Logaritmos cobradas no ENEM?",
+                        explanation: "• Definição: $\\log_b(a) = c \\iff b^c = a$.\n• **Log da Multiplicação**: $\\log_b(x \\cdot y) = \\log_b(x) + \\log_b(y)$\n• **Log da Divisão**: $\\log_b\\left(\\frac{x}{y}\\right) = \\log_b(x) - \\log_b(y)$\n• **Log da Potência (Peteleco)**: $\\log_b(x^k) = k \\cdot \\log_b(x)$.",
+                        strategy: "Aplicado no ENEM em Escala Richter (terremotos), pH (química) e Decibéis (acústica).",
+                        trap: "Inventar falsas propriedades como achar que $\\log(x + y)$ é igual a $\\log(x) + \\log(y)$."
+                    },
+                    {
+                        id: "alg_5",
+                        topic: "Sistemas Lineares",
+                        question: "Como resolver e modelar Sistemas de Equações do 1º Grau no cotidiano?",
+                        explanation: "Sistemas relacionam duas ou mais incógnitas. Podem ser resolvidos por **Substituição** ou **Adição**.\nExemplo: $x + y = 30$ (total de veículos) e $2x + 4y = 80$ (total de rodas de carros e motos).",
+                        strategy: "Substitua as opções das alternativas nas equações para checar a igualdade caso o sistema seja complexo.",
+                        trap: "Esquecer de verificar se os valores encontrados satisfazem **todas** as equações do sistema."
+                    },
+                    {
+                        id: "alg_6",
+                        topic: "Progressão Aritmética (PA)",
+                        question: "Quais são as fórmulas do Termo Geral e da Soma dos Termos de uma PA?",
+                        explanation: "• **Razão ($r$)**: Diferença constante entre termos vizinhos ($r = a_2 - a_1$).\n• **Termo Geral**: $a_n = a_1 + (n - 1) \\cdot r$\n• **Soma dos $n$ primeiros termos**: $S_n = \\frac{(a_1 + a_n) \\cdot n}{2}$.",
+                        strategy: "Utilize PA em problemas de parcelas com aumentos fixos constantes ou estruturas em fileiras.",
+                        trap: "Confundir o número do termo ($n$) com o valor do termo ($a_n$)."
+                    },
+                    {
+                        id: "alg_7",
+                        topic: "Progressão Geométrica (PG)",
+                        question: "Como funcionam o Termo Geral e a Soma Infinita de uma PG convergente?",
+                        explanation: "• **Razão ($q$)**: Quociente constante entre termos ($q = \\frac{a_2}{a_1}$).\n• **Termo Geral**: $a_n = a_1 \\cdot q^{n-1}$\n• **Soma Infinita (para $-1 < q < 1$)**: $S_{\\infty} = \\frac{a_1}{1 - q}$.",
+                        strategy: "Se os termos vão caindo pela metade sucessivamente ($q = 1/2$), a soma de infinitos termos converge para um número finito.",
+                        trap: "Multiplicar a razão $q$ pelo termo $a_1$ antes de aplicar a potenciação do expoente."
+                    },
+                    {
+                        id: "alg_8",
+                        topic: "Análise Gráfica de Funções",
+                        question: "Como identificar deslocamentos e transformações nos gráficos de funções?",
+                        explanation: "• $f(x) + k$: Desloca o gráfico $k$ unidades **para cima**.\n• $f(x - k)$: Desloca o gráfico $k$ unidades **para a direita**.\n• $-f(x)$: Reflete o gráfico em relação ao eixo $X$.",
+                        strategy: "Analise os pontos onde a curva cruza os eixos $X$ e $Y$ para testar a validade da lei de formação.",
+                        trap: "Achar que $f(x + k)$ desloca para a direita; desloca para a **esquerda**!"
+                    }
+                ]
+            },
+            {
+                areaId: "matematica",
+                areaName: "Matemática e Suas Tecnologias",
+                areaIcon: "fa-calculator",
+                subjectId: "estatistica_probabilidade",
+                subjectName: "Estatística e Probabilidade",
+                icon: "fa-chart-pie",
+                cards: [
+                    {
+                        id: "est_1",
+                        topic: "Probabilidade Simples",
+                        question: "Qual a fórmula básica da Probabilidade e o conceito de Espaço Amostral?",
+                        explanation: "$P(A) = \\frac{\\text{Número de Casos Favoráveis}}{\\text{Número de Casos Possíveis (Espaço Amostral)}}$.\nO valor da probabilidade varia sempre entre $0$ ($0\\%$, evento impossível) e $1$ ($100\\%$, evento certo).",
+                        strategy: "Certifique-se de restringir corretamente o Espaço Amostral após a leitura atenta das condições do enunciado.",
+                        trap: "Esquecer de atualizar o Espaço Amostral em retiradas sucessivas sem reposição!"
+                    },
+                    {
+                        id: "est_2",
+                        topic: "Probabilidade Condicional",
+                        question: "Como calcular a Probabilidade Condicional $P(A|B)$ em eventos dependentes?",
+                        explanation: "$P(A|B) = \\frac{P(A \\cap B)}{P(B)}$ (Probabilidade de ocorrer $A$, sabendo que $B$ **já ocorreu**).\nA ocorrência do evento $B$ reduz/restringe o espaço amostral original para apenas os elementos de $B$.",
+                        strategy: "Ao ler a frase 'sabendo que...', use o grupo mencionado após essa frase como o novo total (denominador).",
+                        trap: "Manter o espaço amostral total da população inteira em vez de usar o subconjunto condicionado."
+                    },
+                    {
+                        id: "est_3",
+                        topic: "Probabilidade da União",
+                        question: "Quando utilizar a regra do 'OU' ($P(A \\cup B)$) e do 'E' ($P(A \\cap B)$)?",
+                        explanation: "• **Regra do 'E' (Eventos Independentes)**: Multiplicam-se as probabilidades: $P(A \\text{ e } B) = P(A) \\cdot P(B)$.\n• **Regra do 'OU' (União)**: Somam-se as probabilidades: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$.",
+                        strategy: "Subtrai-se a interseção $P(A \\cap B)$ na união para não contar os elementos duplos duas vezes.",
+                        trap: "Esquecer de subtrair a interseção ao somar a probabilidade de eventos não mutuamente exclusivos."
+                    },
+                    {
+                        id: "est_4",
+                        topic: "Princípio Fundamental da Contagem (PFC)",
+                        question: "Como aplicar o PFC em problemas de decisões em etapas sucessivas?",
+                        explanation: "Se uma decisão pode ser tomada de $n_1$ maneiras e, em seguida, uma segunda decisão de $n_2$ maneiras, o número total de combinações é o **produto**: $N = n_1 \\cdot n_2 \\cdot n_3 \\dots$",
+                        strategy: "Comece sempre preenchendo as casas com as **maiores restrições** do problema (ex: números pares, algarismos distintos).",
+                        trap: "Somar as possibilidades em vez de multiplicá-las nas decisões em etapas encadeadas."
+                    },
+                    {
+                        id: "est_5",
+                        topic: "Permutação Simples e com Repetição",
+                        question: "Qual a diferença entre Permutação Simples ($P_n$) e Permutação com Repetição?",
+                        explanation: "• **Permutação Simples**: Troca de ordem de $n$ elementos distintos: $P_n = n!$.\n• **Permutação com Repetição**: Quando há elementos repetidos (ex: anagramas da palavra 'ARARA'): $P_n^{a,b} = \\frac{n!}{a! \\cdot b!}$, dividindo pelos fatoriais das repetições.",
+                        strategy: "Sempre divida pelo fatorial da quantidade de vezes que cada elemento se repete.",
+                        trap: "Não descontar as repetições em anagramas de palavras que possuem letras repetidas."
+                    },
+                    {
+                        id: "est_6",
+                        topic: "Arranjos vs Combinações",
+                        question: "Como saber se a ORDEM dos elementos importa (Arranjo) ou NÃO importa (Combinação)?",
+                        explanation: "Faça o teste: Mude a ordem de um subconjunto escolhido.\n• Se a mudança **criar um grupo NOVO** $\\rightarrow$ A ordem **IMPORTA** $\\rightarrow$ **ARRANJO** ($A_{n,k} = \\frac{n!}{(n-k)!}$).\n• Se o grupo continuar **SENDO O MESMO** $\\rightarrow$ A ordem **NÃO IMPORTA** $\\rightarrow$ **COMBINAÇÃO** ($C_{n,k} = \\frac{n!}{k! \\cdot (n-k)!}$).",
+                        strategy: "Escolha de comissões, times de basquete e saladas de fruta -> **Combinação**. Senhas, pódios e cargos de Presidente/Vice -> **Arranjo**.",
+                        trap: "Usar Arranjo para formar comissões onde as pessoas têm papéis idênticos."
+                    },
+                    {
+                        id: "est_7",
+                        topic: "Variância e Desvio Padrão",
+                        question: "O que o Desvio Padrão mede em um conjunto de dados no ENEM?",
+                        explanation: "O Desvio Padrão (raiz quadrada da Variância) mede o **nível de dispersão ou heterogeneidade** dos dados em relação à média.\n• **Desvio Padrão BAIXO**: Dados homogêneos, regulares e concentrados perto da média.\n• **Desvio Padrão ALTO**: Dados heterogêneos, irregulares e dispersos.",
+                        strategy: "Se o ENEM pedir o candidato 'mais regular' ou 'mais constante', escolha aquele com o **menor desvio padrão**.",
+                        trap: "Achar que desvio padrão alto significa melhor desempenho; significa apenas maior irregularidade."
+                    },
+                    {
+                        id: "est_8",
+                        topic: "Histogramas e Boxplot",
+                        question: "Como extrair Quartis e amplitude interquartil a partir do gráfico Boxplot?",
+                        explanation: "O Boxplot mostra:\n• Limite inferior e superior (extremos).\n• **Q1 (1º Quartil)**: $25\\%$ dos dados abaixo.\n• **Q2 (Mediana)**: Linha central dentro da caixa ($50\\%$).\n• **Q3 (3º Quartil)**: $75\\%$ dos dados abaixo.\n• A largura da caixa é a Amplitude Interquartil ($Q3 - Q1$).",
+                        strategy: "A linha central no meio do retângulo do Boxplot representa exatamente a **Mediana** dos dados.",
+                        trap: "Confundir a linha da mediana do Boxplot com a média aritmética dos dados."
+                    }
+                ]
+            },
+
+            // ==========================================
+            // 5. REDAÇÃO MODELO ENEM
+            // ==========================================
+            {
+                areaId: "redacao",
+                areaName: "Redação Nota 1000",
+                areaIcon: "fa-feather",
+                subjectId: "redacao_guias",
+                subjectName: "Guia Estrutural & Repertórios Coringas",
+                icon: "fa-pen-to-square",
+                cards: [
+                    {
+                        id: "red_1",
+                        topic: "Introdução Impecável",
+                        question: "Card 1: Como fazer a Introdução perfeita (Contexto, Tema, Tese D1 e D2)?",
+                        explanation: "A introdução deve ter entre 5 e 7 linhas dividida em 3 frases bem articuladas:\n1. **Contextualização/Repertório**: Alusão histórica, filosófica ou sociocultural legítima relacionada ao tema.\n2. **Apresentação do Tema**: Conexão explícita com o repertório usando conectivo e contendo **todas as palavras-chave do comando**.\n3. **Tese Composta**: Análise das duas causas/problemas que serão desenvolvidos (Tese D1 e Tese D2).\n• Exemplo de Esqueleto: *'Na obra X, aborda-se Y. De modo análogo, no Brasil contemporâneo, o [Tema] persiste como grave problema. Isso ocorre não apenas devido à [Causa/D1], mas também ao [Causa/D2].'*",
+                        strategy: "Nunca omita nenhuma palavra-chave do tema na introdução sob risco de sofrer **tangenciamento** e perder pontos na C2 e C3.",
+                        trap: "Iniciar a redação diretamente com 'Hoje em dia' ou 'Desde os primórdios da humanidade'. Use repertório produtivo e legítimo!"
+                    },
+                    {
+                        id: "red_2",
+                        topic: "Desenvolvimento 1 (D1)",
+                        question: "Card 2: Como estruturar o Desenvolvimento 1 (Tópico Frasal, Repertório e Argumentação)?",
+                        explanation: "O parágrafo do D1 deve possuir entre 7 e 8 linhas estruturado em 4 momentos:\n1. **Tópico Frasal**: Afirmação direta da Causa 1 apresentada na tese (ex: *'Em primeira análise, cabe pontuar a omissão estatal como fator determinante...'*).\n2. **Repertório Sociocultural**: Citação de filósofo, sociólogo, legislação ou dado estritamente pertinente.\n3. **Argumentação / Liaison**: Aprofundamento crítico que conecta explicitamente a teoria do repertório à realidade do problema no Brasil.\n4. **Fechamento do Parágrafo**: Conclusão do raciocínio articulada com o tema.",
+                        strategy: "Sempre explique **por que e como** o repertório citado se aplica à realidade do tema. O repertório precisa ser **Produtivo**!",
+                        trap: "Citar um autor famoso (ex: Bauman ou Kant) e não explicar a ligação direta com a sua tese no parágrafo."
+                    },
+                    {
+                        id: "red_3",
+                        topic: "Desenvolvimento 2 (D2)",
+                        question: "Card 3: Como fazer o Desenvolvimento 2 (Aprofundamento e Relações de Causa/Efeito)?",
+                        explanation: "O D2 deve iniciar **obrigatoriamente com conectivo interparágrafo de adição ou contraposição** (*'Ademais,', 'Outrossim,', 'Por outro lado,'*).\nEstrutura:\n1. **Tópico Frasal**: Apresentação da Causa 2 (ex: *'Ademais, a negligência cultural/social perpetua esse quadro...'*).\n2. **Repertório ou Análise Causal**: Uso de repertório complementar ou argumentação baseada em Causa e Consequência rigorosa.\n3. **Aprofundamento Crítico**: Mostrar os impactos nefastos na sociedade e na vida dos cidadãos atingidos.\n4. **Fechamento**: Síntese direcionando para a necessidade de intervenção.",
+                        strategy: "Garanta que o D2 tenha o mesmo peso e densidade argumentativa do D1, evitando que pareça um parágrafo mais fraco.",
+                        trap: "Esquecer o conectivo interparágrafo no início do D2. Isso penaliza diretamente a Competência 4!"
+                    },
+                    {
+                        id: "red_4",
+                        topic: "Conclusão e Proposta (C5)",
+                        question: "Card 4: Como fazer a Conclusão perfeita com os 5 Elementos Obrigatórios (AAMED)?",
+                        explanation: "A proposta de intervenção exige obrigatoriamente **5 ELEMENTOS (40 pontos cada)**:\n1. **AGENTE**: Quem executará? (Ex: *O Ministério da Educação*)\n2. **AÇÃO**: O que será feito? (Ex: *deve implementar oficinas pedagógicas...*)\n3. **MEIO/MODO**: Como será feito? (Ex: *por meio de investimentos orçamentários e parcerias com ONGs...*)\n4. **EFEITO/FINALIDADE**: Para quê? (Ex: *com o fito de mitigar a evasão escolar...*)\n5. **DETALHAMENTO**: Explicação, exemplificação ou justificativa adicional de um dos 4 elementos anteriores (Ex: *, órgão federal responsável pelas diretrizes de ensino,*).",
+                        strategy: "Utilize a fórmula GOMIF para lembrar dos Agentes: **G**overno, **O**NGs, **M**ídia, **I**stituições de ensino / Igreja, **F**amília.",
+                        trap: "Apresentar propostas genéricas como 'Conscientizar a sociedade' sem detalhar o Meio/Modo e sem detalhar nenhum elemento."
+                    },
+                    {
+                        id: "red_5",
+                        topic: "Repertórios Coringas Universais",
+                        question: "Card 5: Quais são os 4 Repertórios Coringas aplicáveis a quase qualquer tema do ENEM?",
+                        explanation: "1. **Constituição Federal de 1988 (Art. 6º)**: Garante como direitos sociais a educação, saúde, alimentação, trabalho, moradia, transporte, lazer e segurança. (Ótimo para denunciar a lacuna entre a lei e a realidade).\n2. **Zygmunt Bauman (Modernidade Líquida)**: A fragilidade das relações humanas e a liquidez das instituições no capitalismo contemporâneo.\n3. **Thomas Hobbes (Contrato Social)**: O Estado tem a obrigação de garantir a segurança e o bem-estar dos cidadãos; quando falha, quebra o pacto social.\n4. **Milton Santos (Cidadania Mutilada)**: Os indivíduos têm seus direitos cerceados, tornando-se 'consumidores' em vez de cidadãos plenos.",
+                        strategy: "Domine o Artigo 6º da Constituição de 88. Ele encaixa em mais de 90% dos temas do ENEM!",
+                        trap: "Usar o repertório de forma decorada sem fazer o link explícito com as palavras-chave do tema."
+                    },
+                    {
+                        id: "red_6",
+                        topic: "As 5 Competências do INEP",
+                        question: "Card 6: Como funcionam as 5 Competências de avaliação da Redação do ENEM (200 pts cada)?",
+                        explanation: "• **C1 (Norma Culta)**: Domínio da modalidade escrita formal, pontuação, concordância e regência (máx. 2 desvios gramaticais para 200 pts).\n• **C2 (Tema e Repertório)**: Compreender o tema sem tangenciar, tipo dissertativo e uso de repertório legitimado e produtivo.\n• **C3 (Projeto de Texto e Argumentação)**: Selecionar, relacionar e organizar argumentos em defesa de um ponto de vista coerente.\n• **C4 (Coesão Textual)**: Uso diversificado de conectivos inter e intraparágrafos sem repetições excessivas.\n• **C5 (Proposta de Intervenção)**: Presença completa dos 5 elementos da proposta de solução.",
+                        strategy: "Revise a C4 inserindo conectivos no início de todos os parágrafos e entre as frases internas.",
+                        trap: "Perder 40 pontos na C2 por usar apenas repertório baseado em conhecimentos de senso comum sem embasamento das áreas do conhecimento."
+                    },
+                    {
+                        id: "red_7",
+                        topic: "Conectivos e Coesão",
+                        question: "Card 7: Quais conectivos estratégicos usar na Coesão Inter e Intraparágrafos?",
+                        explanation: "• **Início do D2 (Interparágrafo)**: *Ademais, / Outrossim, / Em segunda análise, / Paralelamente,*\n• **Início da Conclusão (Interparágrafo)**: *Portanto, / Depreende-se, pois, / Em suma, / Infere-se, portanto,*\n• **Dentro dos Parágrafos (Intraparágrafos)**:\n  - Causa/Explicação: *visto que, porquanto, posto que, haja vista*\n  - Concessão/Oposição: *embora, contudo, todavia, no entanto*\n  - Consequência/Efeito: *de sorte que, desse modo, assim, por conseguinte*.",
+                        strategy: "Tenha no mínimo 2 conectivos interparágrafos (no D2 e na Conclusão) e pelo menos 2 conectivos intraparágrafos por parágrafo.",
+                        trap: "Repetir o conectivo 'Além disso' ou 'Onde' várias vezes no texto. Use sinonímia e conectivos variados!"
+                    },
+                    {
+                        id: "red_8",
+                        topic: "O que ZERA a Redação e Pegadinhas",
+                        question: "Card 8: Quais motivos levam à nota ZERO e quais as principais pegadinhas do INEP?",
+                        explanation: "• **Nota ZERO**: Fuga total ao tema, não atendimento à estrutura dissertativa-argumentativa, texto com menos de 7 linhas, cópia integral dos textos motivadores, trechos deliberadamente desconectados, impropérios ou desenhos.\n• **Pegadinha do Tangenciamento**: Abordar apenas parte do tema (ex: no tema 'Democratização do acesso ao cinema no Brasil', falar só de cinema e esquecer de falar sobre 'democratização e acesso no Brasil') faz a nota despencar para 40 pontos na C2 e C3!",
+                        strategy: "Sublinhe todas as palavras da proposta de redação e garanta que todas apareçam no seu texto.",
+                        trap: "Copiar frases dos textos motivadores. Trechos copiados são desconsiderados na contagem de linhas!"
+                    }
+                ]
+            }
+        ];
+
+        // LOCAL STORAGE STATE MANAGEMENT
+        const STORAGE_KEY = "enem_flashcards_progress_v2";
+        let userProgress = {}; // Structure: { [cardId]: 'dominei' | 'duvida' | 'errei' }
+
+        // CURRENT VIEW & STUDY STATE
+        let currentSubject = null;
+        let currentCardsList = [];
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+        let studyMode = 'single'; // 'single' | 'grid'
+
+        // INITIALIZATION
+        window.onload = function() {
+            loadProgressFromStorage();
+            renderDashboardAreas();
+            updateGlobalStatsUI();
+        };
+
+        // LOCAL STORAGE FUNCTIONS
+        function loadProgressFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    userProgress = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar do LocalStorage", e);
+                userProgress = {};
+            }
+        }
+
+        function saveProgressToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
+            } catch (e) {
+                console.error("Erro ao salvar no LocalStorage", e);
+            }
+            updateGlobalStatsUI();
+        }
+
+        function resetAllProgress() {
+            if (confirm("Deseja realmente resetar todo o seu progresso de estudo dos flashcards?")) {
+                userProgress = {};
+                saveProgressToStorage();
+                renderDashboardAreas();
+                if (currentSubject) {
+                    openSubjectStudy(currentSubject.subjectId);
+                }
+            }
+        }
+
+        // STATS CALCULATION & UI UPDATE
+        function calculateGlobalStats() {
+            let totalCards = 136;
+            let dominei = 0;
+            let duvida = 0;
+            let errei = 0;
+
+            Object.values(userProgress).forEach(status => {
+                if (status === 'dominei') dominei++;
+                else if (status === 'duvida') duvida++;
+                else if (status === 'errei') errei++;
+            });
+
+            let totalStudied = dominei + duvida + errei;
+            let accuracy = totalStudied > 0 ? Math.round((dominei / totalStudied) * 100) : 0;
+
+            return { totalCards, totalStudied, dominei, duvida, errei, accuracy };
+        }
+
+        function updateGlobalStatsUI() {
+            const stats = calculateGlobalStats();
+
+            document.getElementById('stat-total-studied').innerText = `${stats.totalStudied} / ${stats.totalCards}`;
+            document.getElementById('stat-dominei').innerText = stats.dominei;
+            document.getElementById('stat-duvida').innerText = stats.duvida;
+            document.getElementById('stat-errei').innerText = stats.errei;
+            document.getElementById('stat-accuracy').innerText = `${stats.accuracy}%`;
+
+            // Progress Bars
+            const pctDominei = (stats.dominei / stats.totalCards) * 100;
+            const pctDuvida = (stats.duvida / stats.totalCards) * 100;
+            const pctErrei = (stats.errei / stats.totalCards) * 100;
+
+            document.getElementById('bar-dominei').style.width = `${pctDominei}%`;
+            document.getElementById('bar-duvida').style.width = `${pctDuvida}%`;
+            document.getElementById('bar-errei').style.width = `${pctErrei}%`;
+        }
+
+        // DASHBOARD RENDERING
+        function renderDashboardAreas() {
+            const container = document.getElementById('areas-container');
+            container.innerHTML = '';
+
+            // Group subjects by area
+            const areaGroups = {};
+            flashcardsData.forEach(sub => {
+                if (!areaGroups[sub.areaId]) {
+                    areaGroups[sub.areaId] = {
+                        areaName: sub.areaName,
+                        areaIcon: sub.areaIcon,
+                        subjects: []
+                    };
+                }
+                areaGroups[sub.areaId].subjects.push(sub);
+            });
+
+            // Render each area section
+            Object.keys(areaGroups).forEach(areaKey => {
+                const area = areaGroups[areaKey];
+
+                const areaSection = document.createElement('div');
+                areaSection.className = 'space-y-4';
+
+                // Area Header
+                areaSection.innerHTML = `
+                    <div class="flex items-center gap-3 border-b-2 border-gold/40 pb-2">
+                        <div class="w-9 h-9 rounded-lg bg-wine text-gold flex items-center justify-center text-lg font-bold shadow">
+                            <i class="fa-solid ${area.areaIcon}"></i>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-wine-dark tracking-tight">
+                            ${area.areaName}
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="grid-area-${areaKey}">
+                    </div>
+                `;
+
+                container.appendChild(areaSection);
+
+                const gridContainer = document.getElementById(`grid-area-${areaKey}`);
+
+                // Render each discipline card
+                area.subjects.forEach(sub => {
+                    let subDominei = 0, subDuvida = 0, subErrei = 0;
+                    sub.cards.forEach(c => {
+                        const st = userProgress[c.id];
+                        if (st === 'dominei') subDominei++;
+                        else if (st === 'duvida') subDuvida++;
+                        else if (st === 'errei') subErrei++;
+                    });
+
+                    const subStudied = subDominei + subDuvida + subErrei;
+                    const subPct = Math.round((subStudied / 8) * 100);
+
+                    const subCard = document.createElement('div');
+                    subCard.className = 'bg-cream-card rounded-2xl p-5 border border-cream-dark shadow-sm hover:shadow-md hover:border-gold/60 transition duration-200 flex flex-col justify-between space-y-4 cursor-pointer group';
+                    subCard.onclick = () => openSubjectStudy(sub.subjectId);
+
+                    subCard.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-wine/10 text-wine flex items-center justify-center text-lg font-extrabold group-hover:bg-wine group-hover:text-cream-light transition duration-200">
+                                    <i class="fa-solid ${sub.icon}"></i>
+                                </div>
+                                <span class="text-xs font-black px-2.5 py-1 rounded-full bg-wine/5 text-wine border border-wine/10">
+                                    8 Flashcards
+                                </span>
+                            </div>
+
+                            <div>
+                                <h4 class="font-extrabold text-lg text-wine-dark group-hover:text-wine transition">
+                                    ${sub.subjectName}
+                                </h4>
+                                <p class="text-xs text-slate-500 font-medium mt-1">
+                                    ${subStudied > 0 ? `${subStudied} de 8 revisados (${subPct}%)` : 'Nenhum card revisado ainda'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-cream-dark h-2 rounded-full overflow-hidden flex">
+                                <div class="bg-emerald-500 h-full" style="width: ${(subDominei/8)*100}%"></div>
+                                <div class="bg-amber-400 h-full" style="width: ${(subDuvida/8)*100}%"></div>
+                                <div class="bg-rose-500 h-full" style="width: ${(subErrei/8)*100}%"></div>
+                            </div>
+
+                            <!-- Badges -->
+                            <div class="flex items-center justify-between text-xs font-bold pt-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-emerald-600"><i class="fa-solid fa-circle text-[8px]"></i> ${subDominei}</span>
+                                    <span class="text-amber-500"><i class="fa-solid fa-circle text-[8px]"></i> ${subDuvida}</span>
+                                    <span class="text-rose-500"><i class="fa-solid fa-circle text-[8px]"></i> ${subErrei}</span>
+                                </div>
+
+                                <span class="text-wine group-hover:translate-x-1 transition duration-200">
+                                    Estudar <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </span>
+                            </div>
+                        </div>
+                    `;
+
+                    gridContainer.appendChild(subCard);
+                });
+            });
+        }
+
+        // VIEW SWITCHING
+        function showDashboard() {
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            document.getElementById('view-study').classList.add('hidden');
+            renderDashboardAreas();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openSubjectStudy(subjectId) {
+            const sub = flashcardsData.find(s => s.subjectId === subjectId);
+            if (!sub) return;
+
+            currentSubject = sub;
+            currentCardsList = [...sub.cards];
+            currentCardIndex = 0;
+            isCardFlipped = false;
+
+            document.getElementById('study-subject-title').innerText = sub.subjectName;
+            document.getElementById('study-area-badge').innerText = sub.areaName;
+
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-study').classList.remove('hidden');
+
+            setStudyMode(studyMode);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // STUDY MODE & NAVIGATION
+        function setStudyMode(mode) {
+            studyMode = mode;
+            const singleBtn = document.getElementById('btn-mode-single');
+            const gridBtn = document.getElementById('btn-mode-grid');
+
+            const singleCont = document.getElementById('mode-single-container');
+            const gridCont = document.getElementById('mode-grid-container');
+
+            if (mode === 'single') {
+                singleBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold text-wine bg-white shadow-sm transition";
+                gridBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-wine transition";
+                singleCont.classList.remove('hidden');
+                gridCont.classList.add('hidden');
+                renderSingleCardView();
+            } else {
+                gridBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold text-wine bg-white shadow-sm transition";
+                singleBtn.className = "px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-wine transition";
+                gridCont.classList.remove('hidden');
+                singleCont.classList.add('hidden');
+                renderGridModeView();
+            }
+        }
+
+        function renderSingleCardView() {
+            if (!currentCardsList || currentCardsList.length === 0) return;
+
+            const card = currentCardsList[currentCardIndex];
+            const status = userProgress[card.id] || 'pending';
+
+            // Reset flip state
+            isCardFlipped = false;
+            const flipCardElem = document.getElementById('main-flip-card');
+            flipCardElem.classList.remove('rotate-y-180');
+
+            // Counter
+            document.getElementById('single-card-counter').innerText = `Card ${currentCardIndex + 1} de ${currentCardsList.length}`;
+
+            // Front Card Content
+            document.getElementById('card-front-topic').innerText = card.topic;
+            document.getElementById('card-front-question').innerText = card.question;
+
+            const frontBadge = document.getElementById('card-front-status-badge');
+            if (status === 'dominei') {
+                frontBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+                frontBadge.innerText = "✓ Dominado";
+            } else if (status === 'duvida') {
+                frontBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700";
+                frontBadge.innerText = "? Dúvida";
+            } else if (status === 'errei') {
+                frontBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700";
+                frontBadge.innerText = "✕ Precisa Rever";
+            } else {
+                frontBadge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500";
+                frontBadge.innerText = "Não Estudado";
+            }
+
+            // Back Card Content
+            document.getElementById('card-back-topic').innerText = card.topic;
+            document.getElementById('card-back-explanation').innerText = card.explanation;
+            document.getElementById('card-back-strategy').innerText = card.strategy;
+            document.getElementById('card-back-trap').innerText = card.trap;
+        }
+
+        function toggleCardFlip(event) {
+            isCardFlipped = !isCardFlipped;
+            const flipCardElem = document.getElementById('main-flip-card');
+            if (isCardFlipped) {
+                flipCardElem.classList.add('rotate-y-180');
+            } else {
+                flipCardElem.classList.remove('rotate-y-180');
+            }
+        }
+
+        function flipCurrentCard() {
+            toggleCardFlip();
+        }
+
+        function navigateCard(direction) {
+            currentCardIndex += direction;
+            if (currentCardIndex < 0) {
+                currentCardIndex = currentCardsList.length - 1;
+            } else if (currentCardIndex >= currentCardsList.length) {
+                currentCardIndex = 0;
+            }
+            renderSingleCardView();
+        }
+
+        function shuffleCurrentDeck() {
+            for (let i = currentCardsList.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentCardsList[i], currentCardsList[j]] = [currentCardsList[j], currentCardsList[i]];
+            }
+            currentCardIndex = 0;
+            renderSingleCardView();
+        }
+
+        function markCardStatus(status) {
+            if (!currentCardsList || currentCardsList.length === 0) return;
+            const card = currentCardsList[currentCardIndex];
+            userProgress[card.id] = status;
+            saveProgressToStorage();
+
+            // Auto advance after selection
+            setTimeout(() => {
+                navigateCard(1);
+            }, 250);
+        }
+
+        // GALLERY GRID MODE RENDERING
+        function renderGridModeView() {
+            const gridCont = document.getElementById('mode-grid-container');
+            gridCont.innerHTML = '';
+
+            currentCardsList.forEach((card, idx) => {
+                const status = userProgress[card.id] || 'pending';
+
+                const cardElem = document.createElement('div');
+                cardElem.className = "perspective-1000 w-full min-h-[360px] cursor-pointer";
+
+                let statusBadgeHTML = '';
+                if (status === 'dominei') {
+                    statusBadgeHTML = `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">✓ Dominei</span>`;
+                } else if (status === 'duvida') {
+                    statusBadgeHTML = `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">? Dúvida</span>`;
+                } else if (status === 'errei') {
+                    statusBadgeHTML = `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">✕ Errei</span>`;
+                } else {
+                    statusBadgeHTML = `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Pendente</span>`;
+                }
+
+                cardElem.innerHTML = `
+                    <div id="grid-card-inner-${card.id}" class="transform-style-3d relative w-full h-full min-h-[360px] rounded-2xl shadow-md border border-cream-dark bg-white transition duration-300">
+                        
+                        <!-- FRONT -->
+                        <div class="backface-hidden absolute inset-0 w-full h-full p-5 flex flex-col justify-between rounded-2xl bg-cream-card text-wine-dark overflow-y-auto">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-gold-dark bg-gold/10 px-2.5 py-0.5 rounded-full border border-gold/20">
+                                    Card ${idx + 1}: ${card.topic}
+                                </span>
+                                ${statusBadgeHTML}
+                            </div>
+
+                            <div class="my-auto py-4 space-y-3 text-center">
+                                <i class="fa-solid fa-lightbulb text-gold text-2xl"></i>
+                                <h4 class="text-base font-extrabold text-wine-dark leading-snug">
+                                    ${card.question}
+                                </h4>
+                            </div>
+
+                            <button onclick="flipGridCard('${card.id}')" class="w-full py-2 bg-wine/10 hover:bg-wine hover:text-white text-wine text-xs font-bold rounded-xl transition">
+                                <i class="fa-solid fa-rotate"></i> Virar Resposta
+                            </button>
+                        </div>
+
+                        <!-- BACK -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full p-5 flex flex-col justify-between rounded-2xl bg-white text-slate-800 overflow-y-auto border border-wine/20">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2 border-slate-100">
+                                    <span class="text-xs font-black text-wine uppercase">${card.topic}</span>
+                                    <button onclick="flipGridCard('${card.id}')" class="text-xs font-bold text-slate-400 hover:text-wine">
+                                        Voltar <i class="fa-solid fa-rotate"></i>
+                                    </button>
+                                </div>
+
+                                <p class="text-xs font-semibold text-slate-700 leading-relaxed">
+                                    ${card.explanation}
+                                </p>
+
+                                <div class="p-2.5 bg-amber-50 rounded-lg text-[11px] text-amber-950 font-medium">
+                                    <strong><i class="fa-solid fa-bolt text-amber-600"></i> Estratégia ENEM:</strong> ${card.strategy}
+                                </div>
+
+                                <div class="p-2.5 bg-rose-50 rounded-lg text-[11px] text-rose-950 font-medium">
+                                    <strong><i class="fa-solid fa-triangle-exclamation text-rose-600"></i> Pegadinha:</strong> ${card.trap}
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-100 grid grid-cols-3 gap-1.5">
+                                <button onclick="markGridCardStatus('${card.id}', 'dominei')" class="py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold">Dominei</button>
+                                <button onclick="markGridCardStatus('${card.id}', 'duvida')" class="py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold">Dúvida</button>
+                                <button onclick="markGridCardStatus('${card.id}', 'errei')" class="py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold">Errei</button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+
+                gridCont.appendChild(cardElem);
+            });
+        }
+
+        function flipGridCard(cardId) {
+            const innerElem = document.getElementById(`grid-card-inner-${cardId}`);
+            if (innerElem) {
+                innerElem.classList.toggle('rotate-y-180');
+            }
+        }
+
+        function markGridCardStatus(cardId, status) {
+            userProgress[cardId] = status;
+            saveProgressToStorage();
+            renderGridModeView();
+        }
+    </script>
+</body>
+</html>
